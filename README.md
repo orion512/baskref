@@ -11,6 +11,13 @@ To go about this we implement include a few layers:
 
 ## How to Setup?
 
+### Install PostgreSQL DB (optional)
+Install PostgreSQL for your operating system.
+https://www.postgresql.org/download/
+
+If you don't want to install a postgreSQL DB you can also choose to
+save the data to flat files (CSV).
+
 ### Virtual Environment
 Create a new virtual environemnt
 ```
@@ -38,7 +45,18 @@ deactivate
 ## Project Structure
 
 ### DB Setup
+- Tables:
+    - team
+    - player
+    - game
+    - player_game_stats
 
 ### Data Collection Layer
+
+#### What data are we collecting?
+- teams
+- players
+- game logs
+- player stats
 
 ### ETL Manager
