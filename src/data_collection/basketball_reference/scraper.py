@@ -6,34 +6,46 @@ from basketball reference website.
 Author: Dominik Zulovec Sajovic, may 2022
 """
 
+from requests_html import HTMLSession
+import pandas as pd
+import time
 
-class BasketballReference(object):
+
+class BasketballReference:
+    """  """
     
     base_url = None
     
     def __init__(self):
+        """ Initializes the class """
         self.base_url = 'https://www.basketball-reference.com'
         
         
     def generate_season_games_url(self, year: int) -> str:
-        return f'/leagues/NBA_{year}_games.html'
+        """ Generates the url for all games in a year """
+        return f'{self.base_url}/leagues/NBA_{year}_games.html'
     
     
-    def scrape_all_month_urls(self, year: int) -> list:
+    def scrape_all_months_urls(self, year: int) -> list:
         """
         Scrapes the urls to every month of a given NBA season
-        positional arguments:
         :year: A year representing the year in which the NBA season ends
         :return: returns a list of month urls from Basketball Reference
         """
         session = HTMLSession()
-        main_page = session.get(f'{self.base_url}{self.generate_season_games_url(year)}')
-        all_months_urls = []
+        main_page = session.get(self.generate_season_games_url(year))
 
-        for a in main_page.html.find('div.filter > div > a'):
-            all_months_urls.append(self.base_url + a.attrs['href'])
-        
-        return all_months_urls
+        if main_page.status_code == 200:
+            all_months_urls = [
+                self.base_url + a.attrs['href'] 
+                for a in main_page.html.find('div.filter > div > a')]
+
+            return all_months_urls
+        else:
+            raise Exception(
+                f"Couldn't scrape {self.generate_season_games_url(year)}."
+                f"Status code: {main_page.status_code}"
+                )
     
     
     def scrape_all_game_urls(self, year: int, display_time:bool=True) -> list:
@@ -297,3 +309,11 @@ class BasketballReference(object):
             print(f"Complete Season Scrape Execution Time: {int(hours):0>2}:{int(minutes):0>2}:{seconds:05.2f}")
             
         return all_games
+
+
+
+if __name__ == '__main__':
+
+    br = BasketballReference()
+    games = br.scrape_all_months_urls(2008)
+    print(games)
