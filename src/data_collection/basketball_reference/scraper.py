@@ -2,6 +2,14 @@
 This page contains the class which is used to scrape data 
 from basketball reference website.
 
+- Scrape all teams https://www.basketball-reference.com/teams/
+- Scrape all players https://www.basketball-reference.com/players/
+- Scrape all games in a year 
+    - https://www.basketball-reference.com/leagues/NBA_2022_games-april.html
+    - scrape all months
+    - scrape all games including link to box scores
+- Scrape all playoff games in a year
+    - https://www.basketball-reference.com/playoffs/NBA_2022_games.html
 
 Author: Dominik Zulovec Sajovic, may 2022
 """
@@ -12,7 +20,7 @@ import time
 
 
 class BasketballReference:
-    """  """
+    """ Class for scraping basketball-reference.com """
     
     base_url = None
     
@@ -48,51 +56,37 @@ class BasketballReference:
                 )
     
     
-    def scrape_all_game_urls(self, year: int, display_time:bool=True) -> list:
+    def scrape_game_urls(self, game_list_urls: list) -> list:
         """
         Scrapes the urls to every game (boxscore) of a given NBA season
-        positional arguments:
-        :year: A year representing the year in which the NBA season ends
-        :display_time: if True will print the execution time
+        :game_list_urls: list of URLs containing list of games
         :return: returns a list of game urls from Basketball Reference
         """
-        start = time.time()
         
         session = HTMLSession()
-        game_count = 0
-        REGULAR_SEASON_GAMES = 1230 #1230
-        all_months_urls = self.scrape_all_month_urls(year)
+        element_finder = 'td[data-stat="box_score_text"]'
         all_game_urls = []
 
-        for schedule_month in all_months_urls:
+        for schedule_month in game_list_urls:
 
             month_page = session.get(schedule_month)
+            if month_page.status_code == 200:
+                for td in month_page.html.find(element_finder):
+                    anch = td.find('a', first=True)
+                    if anch != None:
+                        url =  anch.find('a', first=True).attrs['href']
+                        all_game_urls.append(self.base_url + url)
+            else:
+                # TODO: Implement what happens if page can't be scraped
+                pass
+                
 
-            for a in month_page.html.find('td[data-stat="box_score_text"]'):
-                a = a.find('a', first=True)
-                if a != None:
-                    all_game_urls.append(self.base_url + a.find('a', first=True).attrs['href'])
-                game_count += 1
-
-                if game_count == REGULAR_SEASON_GAMES:
-                    break
-
-            if game_count == REGULAR_SEASON_GAMES:
-                break
-
-        end = time.time()
-        
-        if display_time:
-            hours, rem = divmod(end-start, 3600)
-            minutes, seconds = divmod(rem, 60)
-            print(f"Scrape All Game URLs Execution Time: {int(hours):0>2}:{int(minutes):0>2}:{seconds:05.2f}")
-        
         return all_game_urls
         
         
     def scrape_season_schedule(self, year: int, display_time:bool=True) -> pd.DataFrame():
         """
-        Scrapes the schedule for th eentire season
+        Scrapes the schedule for th entire season
         positional arguments:
         :year: A year representing the year in which the NBA season ends
         :display_time: if True will print the execution time
@@ -313,7 +307,4 @@ class BasketballReference:
 
 
 if __name__ == '__main__':
-
-    br = BasketballReference()
-    games = br.scrape_all_months_urls(2008)
-    print(games)
+    pass
