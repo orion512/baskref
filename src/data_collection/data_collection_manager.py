@@ -20,7 +20,7 @@ def run_data_collection_manager():
     br = BasketballReference()
     month_urls = br.scrape_all_months_urls(YEAR)
     game_urls = br.scrape_game_urls(month_urls)
-    print(game_urls)
+    print(len(game_urls))
     # games = br.scrape_all_games_data(YEAR)
     # df_games = pd.DataFrame(games)
 
@@ -32,4 +32,4 @@ def run_data_collection_manager():
 
 
 if __name__ == '__main__':
-    pass
+    run_data_collection_manager()

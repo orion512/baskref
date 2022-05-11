@@ -1,34 +1,5 @@
 import psycopg2
 import psycopg2.extras
-from requests_html import HTMLSession
-
-print('Script Start')
-
-# Global Variables
-
-
-# Functions
-def scrape_games(year: int):
-    br_season_games_url = f'https://www.basketball-reference.com/leagues/NBA_{year}_games.html'
-
-    session = HTMLSession()
-    r = session.get(br_season_games_url)
-
-    schedule_table_body = r.html.find('#schedule', first=True).find('tbody', first=True)
-    schedule_rows = schedule_table_body.find('tr')
-
-    games = []
-    for row in schedule_rows:
-        games.append((
-            row.find('th[data-stat=date_game]', first=True).text,
-            row.find('td[data-stat=visitor_team_name]', first=True).find('a', first=True).text,
-            row.find('td[data-stat=home_team_name]', first=True).find('a', first=True).text,
-            int(row.find('td[data-stat=visitor_pts]', first=True).text),
-            int(row.find('td[data-stat=home_pts]', first=True).text),
-        ))
-
-    return games
-
 
 def insert_games(games_to_insert: list):
 
@@ -89,8 +60,3 @@ def main():
 
     cnt = select_game_cnt()
     print(f'DB game count: {cnt}')
-
-
-
-if __name__ == "__main__":
-    main()
