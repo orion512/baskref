@@ -40,6 +40,10 @@ class BasketballReference:
         :year: A year representing the year in which the NBA season ends
         :return: returns a list of month urls from Basketball Reference
         """
+        # TODO: change al session to this
+        with HTMLSession() as session:
+            
+
         session = HTMLSession()
         main_page = session.get(self.generate_season_games_url(year))
 
@@ -55,95 +59,47 @@ class BasketballReference:
                 f"Status code: {main_page.status_code}"
                 )
     
-    
-    def scrape_game_urls(self, game_list_urls: list) -> list:
+
+    def scrape_game_urls(self, page: str) -> list:
         """
-        Scrapes the urls to every game (boxscore) of a given NBA season
-        :game_list_urls: list of URLs containing list of games
+        Scrapes the urls to every game (boxscore) from the webpage
+        :page: web page - /leagues/NBA_YEAR_games-MONTH.html
         :return: returns a list of game urls from Basketball Reference
         """
         
         session = HTMLSession()
         element_finder = 'td[data-stat="box_score_text"]'
-        all_game_urls = []
+        game_urls = []
 
-        for schedule_month in game_list_urls:
-
-            month_page = session.get(schedule_month)
+        try:
+            month_page = session.get(page)
             if month_page.status_code == 200:
                 for td in month_page.html.find(element_finder):
                     anch = td.find('a', first=True)
                     if anch != None:
                         url =  anch.find('a', first=True).attrs['href']
-                        all_game_urls.append(self.base_url + url)
-            else:
-                # TODO: Implement what happens if page can't be scraped
-                pass
-                
+                        game_urls.append(self.base_url + url)
+        except:
+            pass
 
-        return all_game_urls
-        
-        
-    def scrape_season_schedule(self, year: int, display_time:bool=True) -> pd.DataFrame():
+        session.close()
+
+        return game_urls
+
+    
+    def scrape_multiple_game_url_pages(self, game_list_urls: list) -> list:
         """
-        Scrapes the schedule for th entire season
-        positional arguments:
-        :year: A year representing the year in which the NBA season ends
-        :display_time: if True will print the execution time
+        Scrapes multiple pages for urls to every game (boxscore).
+        :game_list_urls: list of URLs containing list of games
         :return: returns a list of game urls from Basketball Reference
         """
-        start = time.time()
 
-        session = HTMLSession()
-
-        all_months_urls = self.scrape_all_month_urls(year)
-        all_scheduled_games = []
-
-        for schedule_month in all_months_urls:
-
-            month_page = session.get(schedule_month)
-
-            table_schedule = month_page.html.find('table[id="schedule"]', first=True).find('tbody', first=True)
-
-            for game_row in table_schedule.find('tr'):
-                game_dic = {}
-                game_date = game_row.find('th[data-stat="date_game"]', first=True).text
-                game_time = game_row.find('td[data-stat="game_start_time"]', first=True).text
-                game_time = game_time.replace('p', 'PM')
-                game_time = game_time.replace('a', 'AM')
-
-                visitor = game_row.find('td[data-stat="visitor_team_name"]', first=True)
-                away_team = visitor.text
-                away_team_short = visitor.attrs['csk'].split('.')[0]
-
-                home = game_row.find('td[data-stat="home_team_name"]', first=True)
-                home_team = home.text
-                home_team_short = home.attrs['csk'].split('.')[0]
-
-                game_time = datetime.strptime(f'{game_date.strip()} {game_time.strip()}', '%a, %b %d, %Y %I:%M%p')
-
-
-                game_dic['GAME_TIME'] = game_time
-                game_dic['HOME_TEAM'] = home_team
-                game_dic['HOME_TEAM_SHORT'] = home_team_short
-                game_dic['AWAY_TEAM'] = away_team
-                game_dic['AWAY_TEAM_SHORT'] = away_team_short
-
-                all_scheduled_games.append(game_dic)
-
-                end = time.time()
-
-        print(f'Scraped {len(all_scheduled_games)} games for the {year} season.')
-
-        if display_time:
-            hours, rem = divmod(end-start, 3600)
-            minutes, seconds = divmod(rem, 60)
-            print(f"Execution Time: {int(hours):0>2}:{int(minutes):0>2}:{seconds:05.2f}")
-
-        return pd.DataFrame(all_scheduled_games)
+        return [
+            gurl for url in game_list_urls 
+            for gurl in self.scrape_game_urls(url)]
     
     
-    def scrape_game_data(self, game_url: str, year:int, game_count: int, display_time:bool=False) -> dict:
+    def scrape_game_data(self, game_url: str, year:int, game_count: int) -> dict:
         """
         Scrapes the data for the given game
         positional arguments:
@@ -152,7 +108,6 @@ class BasketballReference:
         :display_time: if True will print the execution time
         :return: returns a dictionary of game data
         """
-        start = time.time()
         
         session = HTMLSession()
         game_page = session.get(game_url)
@@ -265,13 +220,6 @@ class BasketballReference:
         game_dic['away_off_rtg'] = float(away_advanced.find('td[data-stat=off_rtg]', first=True).text)
         game_dic['away_def_rtg'] = float(away_advanced.find('td[data-stat=def_rtg]', first=True).text)
         
-        end = time.time()
-        
-        if display_time:
-            hours, rem = divmod(end-start, 3600)
-            minutes, seconds = divmod(rem, 60)
-            print(f"Single Game Scraped Execution Time: {int(hours):0>2}:{int(minutes):0>2}:{seconds:05.2f}")
-            
         return game_dic
     
     
@@ -303,6 +251,65 @@ class BasketballReference:
             print(f"Complete Season Scrape Execution Time: {int(hours):0>2}:{int(minutes):0>2}:{seconds:05.2f}")
             
         return all_games
+
+
+    def scrape_season_schedule(self, year: int, display_time:bool=True) -> pd.DataFrame():
+        """
+        Scrapes the schedule for the entire season
+        positional arguments:
+        :year: A year representing the year in which the NBA season ends
+        :display_time: if True will print the execution time
+        :return: returns a list of game urls from Basketball Reference
+        """
+        start = time.time()
+
+        session = HTMLSession()
+
+        all_months_urls = self.scrape_all_month_urls(year)
+        all_scheduled_games = []
+
+        for schedule_month in all_months_urls:
+
+            month_page = session.get(schedule_month)
+
+            table_schedule = month_page.html.find('table[id="schedule"]', first=True).find('tbody', first=True)
+
+            for game_row in table_schedule.find('tr'):
+                game_dic = {}
+                game_date = game_row.find('th[data-stat="date_game"]', first=True).text
+                game_time = game_row.find('td[data-stat="game_start_time"]', first=True).text
+                game_time = game_time.replace('p', 'PM')
+                game_time = game_time.replace('a', 'AM')
+
+                visitor = game_row.find('td[data-stat="visitor_team_name"]', first=True)
+                away_team = visitor.text
+                away_team_short = visitor.attrs['csk'].split('.')[0]
+
+                home = game_row.find('td[data-stat="home_team_name"]', first=True)
+                home_team = home.text
+                home_team_short = home.attrs['csk'].split('.')[0]
+
+                game_time = datetime.strptime(f'{game_date.strip()} {game_time.strip()}', '%a, %b %d, %Y %I:%M%p')
+
+
+                game_dic['GAME_TIME'] = game_time
+                game_dic['HOME_TEAM'] = home_team
+                game_dic['HOME_TEAM_SHORT'] = home_team_short
+                game_dic['AWAY_TEAM'] = away_team
+                game_dic['AWAY_TEAM_SHORT'] = away_team_short
+
+                all_scheduled_games.append(game_dic)
+
+                end = time.time()
+
+        print(f'Scraped {len(all_scheduled_games)} games for the {year} season.')
+
+        if display_time:
+            hours, rem = divmod(end-start, 3600)
+            minutes, seconds = divmod(rem, 60)
+            print(f"Execution Time: {int(hours):0>2}:{int(minutes):0>2}:{seconds:05.2f}")
+
+        return pd.DataFrame(all_scheduled_games)
 
 
 
