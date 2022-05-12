@@ -40,24 +40,21 @@ class BasketballReference:
         :year: A year representing the year in which the NBA season ends
         :return: returns a list of month urls from Basketball Reference
         """
-        # TODO: change al session to this
+
         with HTMLSession() as session:
-            
 
-        session = HTMLSession()
-        main_page = session.get(self.generate_season_games_url(year))
+            main_page = session.get(self.generate_season_games_url(year))
+            if main_page.status_code == 200:
+                all_months_urls = [
+                    self.base_url + a.attrs['href'] 
+                    for a in main_page.html.find('div.filter > div > a')]
 
-        if main_page.status_code == 200:
-            all_months_urls = [
-                self.base_url + a.attrs['href'] 
-                for a in main_page.html.find('div.filter > div > a')]
-
-            return all_months_urls
-        else:
-            raise Exception(
-                f"Couldn't scrape {self.generate_season_games_url(year)}."
-                f"Status code: {main_page.status_code}"
-                )
+                return all_months_urls
+            else:
+                raise Exception(
+                    f"Couldn't scrape {self.generate_season_games_url(year)}."
+                    f"Status code: {main_page.status_code}"
+                    )
     
 
     def scrape_game_urls(self, page: str) -> list:
