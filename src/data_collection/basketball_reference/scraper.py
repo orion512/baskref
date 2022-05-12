@@ -64,18 +64,18 @@ class BasketballReference:
         :return: returns a list of game urls from Basketball Reference
         """
         
-        session = HTMLSession()
         element_finder = 'td[data-stat="box_score_text"]'
         game_urls = []
 
         try:
-            month_page = session.get(page)
-            if month_page.status_code == 200:
-                for td in month_page.html.find(element_finder):
-                    anch = td.find('a', first=True)
-                    if anch != None:
-                        url =  anch.find('a', first=True).attrs['href']
-                        game_urls.append(self.base_url + url)
+            with HTMLSession() as session:
+                month_page = session.get(page)
+                if month_page.status_code == 200:
+                    for td in month_page.html.find(element_finder):
+                        anch = td.find('a', first=True)
+                        if anch != None:
+                            url =  anch.find('a', first=True).attrs['href']
+                            game_urls.append(self.base_url + url)
         except:
             pass
 
