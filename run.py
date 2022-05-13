@@ -4,23 +4,31 @@
 
 import os
 import argparse
+import logging
+import sys
 
+from settings.settings import Settings
 from src.data_collection.data_collection_manager import \
     run_data_collection_manager
 
-def main(settings):
-    run_data_collection_manager()
+def main(settings: Settings):
+    """ The main entry point into the project """
+
+    logger = logging.getLogger('blogger')
+    logger.setLevel(logging.DEBUG)
+
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+
+    run_data_collection_manager(settings, logger)
 
 
 if __name__ == "__main__":
 
     my_parser = argparse.ArgumentParser()
-    my_parser.add_argument(
-        'config_path',
-        metavar='path',
-        type=str,
-        help='Path to config YAML file.')
-    args = my_parser.parse_args()
 
     parser = argparse.ArgumentParser()
     default_path = os.path.join('settings', 'settings.py')
