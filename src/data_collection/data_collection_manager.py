@@ -27,10 +27,14 @@ def run_data_collection_manager(
     YEAR = 2008
 
     br = BasketballReference()
-    month_urls = br.scrape_all_months_urls(YEAR)
-    game_urls = br.scrape_multiple_game_url_pages(month_urls)
-    logger.info(len(game_urls))
-    # print(len(game_urls))
+    # month_urls = br.scrape_all_months_urls(YEAR)
+    # game_urls = br.scrape_multiple_game_url_pages(month_urls)
+    # logger.info(game_urls)
+
+    test_url = 'https://www.basketball-reference.com/boxscores/200805160UTA.html'
+    game_data = br.scrape_game_data(test_url)
+    logger.info(game_data)
+    
     # games = br.scrape_all_games_data(YEAR)
     # df_games = pd.DataFrame(games)
 
