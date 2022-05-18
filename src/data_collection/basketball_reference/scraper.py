@@ -37,21 +37,6 @@ class BasketballReference:
         return f'{self.base_url}/leagues/NBA_{year}_games.html'
 
     
-    def __get_page(self, url: str) -> Response:
-        """
-        Makes a get request to the provided URL and 
-        return a response if status code is ok (200).
-        """
-
-        with HTMLSession() as session:
-            page = session.get(url)
-            if page.status_code == 200:
-                return page
-            else:
-                raise Exception(
-                    f"Couldn't scrape {url}. Status code: {page.status_code}")
-
-    
     def scrape_all_months_urls(self, year: int) -> list:
         """
         Scrapes the urls to every month of a given NBA season
@@ -98,127 +83,7 @@ class BasketballReference:
             gurl for url in game_list_urls 
             for gurl in self.scrape_game_urls(url)]
 
-    
-    def __parse_team_name(self, html: Response, team: str) -> Tuple[str, str]:
-        """
-        Provided the BR game page and the team parameter it parses out 
-        the team short and long names.
-        :team: indicates the home or away team
-        :return: Tuple(team long name, team short name)
-        """
 
-        if team not in ['home', 'away']:
-            raise ValueError(
-                'The team argument can only be "home" or "away"')
-
-        team_idx = 1 if team == 'home' else 2
-
-        team_anchor = html.html.find(
-            f"#content > div.scorebox > div:nth-child({team_idx}) " \
-            "> div:nth-child(1) > strong > a", first=True
-            )
-        
-        return team_anchor.text, team_anchor.attrs['href'].split('/')[2]
-
-    
-    def __parse_game_meta_data(self, html: Response) -> Tuple[datetime, str]:
-        """
-        Provided the BR game page it parses out the game time and 
-        game arena name.
-        :return: Tuple(time of game start, name of the arena)
-        """
-
-        meta_holder = html.html.find('div.scorebox_meta', first=True)
-        game_time = datetime.strptime(
-            meta_holder.find('div')[1].text, "%I:%M %p, %B %d, %Y")
-        arena_name = meta_holder.find('div')[2].text.split(',')[0]
-        
-        return game_time, arena_name
-
-    
-    def __parse_attendance(self, html: Response) -> Optional[int]:
-        """
-        Provided the BR game page it parses out the game attendance.
-        Sometime the page doesn't include attendance in which case the 
-        method return None.
-        :return: attendance as an integer
-        """
-
-        if 'Attendance' in html.text:
-            attendance_text = html.text[
-                html.text.index('Attendance'):html.text.index('Attendance')+35]
-            digits = [s for s in attendance_text if s.isdigit()]
-            attendance = ''
-            for att in digits:
-                attendance += att
-            attendance = int(attendance)
-            return attendance
-
-        return None
-
-    
-    def __simple_parse(self, html: Response, finder: str, txt: bool=True
-    ) -> Union[str, Element]:
-        """
-        Provided a response object with html and a CSS finder
-        it parses out the text (or whole element) of the first element found.
-        Sometime the page doesn't include attendance in which case the 
-        method return None.
-        :return: the text of the element
-        """
-
-        ele = html.html.find(finder, first=True)
-        
-        if txt:
-            return ele.text
-        else:
-            return ele
-
-    
-    def __basic_stats(self, html: Response, team: str, team_sn: str
-                                    ) -> Dict[str, Union[int, float]]:
-        """
-        Provided the BR game page it parses out the basic stats 
-        for either the home or the road team, depending on the 
-        passed parameter.
-        Sometime the page doesn't include attendance in which case the 
-        method return None.
-        :team: inidcates if it team is home or away
-        :team_sn: the short name of the team
-        :return: attendance as an integer
-        """
-
-        table_finder = f'#box-{team_sn.upper()}-game-basic'
-
-        tb = self.__simple_parse(html, table_finder, txt=False)
-        tb_foot = self.__simple_parse(tb, 'tfoot', txt=False)
-
-        game_dic = {
-            'home_fg': int(self.__simple_parse(tb_foot, 'td[data-stat=fg]'))
-        }
-
-        
-
-        game_dic['home_fg'] = int(home_basic.find('td[data-stat=fg]', first=True).text)
-        game_dic['home_fga'] = int(home_basic.find('td[data-stat=fga]', first=True).text)
-        game_dic['home_fg_pct'] = float(home_basic.find('td[data-stat=fg_pct]', first=True).text)
-        game_dic['home_fg3'] = int(home_basic.find('td[data-stat=fg3]', first=True).text)
-        game_dic['home_fg3a'] = int(home_basic.find('td[data-stat=fg3a]', first=True).text)
-        game_dic['home_fg3_pct'] = float(home_basic.find('td[data-stat=fg3_pct]', first=True).text)
-        game_dic['home_ft'] = int(home_basic.find('td[data-stat=ft]', first=True).text)
-        game_dic['home_fta'] = int(home_basic.find('td[data-stat=fta]', first=True).text)
-        game_dic['home_ft_pct'] = float(home_basic.find('td[data-stat=ft_pct]', first=True).text)
-        game_dic['home_orb'] = int(home_basic.find('td[data-stat=orb]', first=True).text)
-        game_dic['home_drb'] = int(home_basic.find('td[data-stat=drb]', first=True).text)
-        game_dic['home_trb'] = int(home_basic.find('td[data-stat=trb]', first=True).text)
-        game_dic['home_ast'] = int(home_basic.find('td[data-stat=ast]', first=True).text)
-        game_dic['home_stl'] = int(home_basic.find('td[data-stat=stl]', first=True).text)
-        game_dic['home_blk'] = int(home_basic.find('td[data-stat=blk]', first=True).text)
-        game_dic['home_tov'] = int(home_basic.find('td[data-stat=tov]', first=True).text)
-        game_dic['home_pf'] = int(home_basic.find('td[data-stat=pf]', first=True).text)
-        game_dic['home_pts'] = int(home_basic.find('td[data-stat=pts]', first=True).text)
-
-    
     def scrape_game_data(self, game_url: str) -> dict:
         """
         Scrapes the data for the given game web page.
@@ -246,6 +111,8 @@ class BasketballReference:
             'arena_name':            arena_name,
             'attendance':            attendance
         }
+
+        home_basic_dic = self.__parse_basic_stats(PARAMETERS)
 
         # home basic
         home_basic = game_page.html.find(f'#box-{home_team.upper()}-game-basic', first=True).find('tfoot', first=True)
@@ -411,6 +278,139 @@ class BasketballReference:
             print(f"Execution Time: {int(hours):0>2}:{int(minutes):0>2}:{seconds:05.2f}")
 
         return pd.DataFrame(all_scheduled_games)
+
+
+    def __get_page(self, url: str) -> Response:
+        """
+        Makes a get request to the provided URL and 
+        return a response if status code is ok (200).
+        """
+
+        with HTMLSession() as session:
+            page = session.get(url)
+            if page.status_code == 200:
+                return page
+            else:
+                raise Exception(
+                    f"Couldn't scrape {url}. Status code: {page.status_code}")
+
+    
+    def __simple_parse(self, html: Response, finder: str, txt: bool=True
+    ) -> Union[str, Element]:
+        """
+        Provided a response object with html and a CSS finder
+        it parses out the text (or whole element) of the first element found.
+        Sometime the page doesn't include attendance in which case the 
+        method return None.
+        :return: the text of the element
+        """
+
+        ele = html.html.find(finder, first=True)
+        
+        if txt:
+            return ele.text
+        else:
+            return ele
+
+    
+    def __parse_team_name(self, html: Response, team: str) -> Tuple[str, str]:
+        """
+        Provided the BR game page and the team parameter it parses out 
+        the team short and long names.
+        :team: indicates the home or away team
+        :return: Tuple(team long name, team short name)
+        """
+
+        if team not in ['home', 'away']:
+            raise ValueError(
+                'The team argument can only be "home" or "away"')
+
+        team_idx = 1 if team == 'home' else 2
+
+        team_anchor = html.html.find(
+            f"#content > div.scorebox > div:nth-child({team_idx}) " \
+            "> div:nth-child(1) > strong > a", first=True
+            )
+        
+        return team_anchor.text, team_anchor.attrs['href'].split('/')[2]
+
+
+    def __parse_game_meta_data(self, html: Response) -> Tuple[datetime, str]:
+        """
+        Provided the BR game page it parses out the game time and 
+        game arena name.
+        :return: Tuple(time of game start, name of the arena)
+        """
+
+        meta_holder = html.html.find('div.scorebox_meta', first=True)
+        game_time = datetime.strptime(
+            meta_holder.find('div')[1].text, "%I:%M %p, %B %d, %Y")
+        arena_name = meta_holder.find('div')[2].text.split(',')[0]
+        
+        return game_time, arena_name
+
+    
+    def __parse_attendance(self, html: Response) -> Optional[int]:
+        """
+        Provided the BR game page it parses out the game attendance.
+        Sometime the page doesn't include attendance in which case the 
+        method return None.
+        :return: attendance as an integer
+        """
+
+        if 'Attendance' in html.text:
+            attendance_text = html.text[
+                html.text.index('Attendance'):html.text.index('Attendance')+35]
+            digits = [s for s in attendance_text if s.isdigit()]
+            attendance = ''
+            for att in digits:
+                attendance += att
+            attendance = int(attendance)
+            return attendance
+
+        return None
+
+
+    def __parse_basic_stats(self, html: Response, team: str, team_sn: str
+                                    ) -> Dict[str, Union[int, float]]:
+        """
+        Provided the BR game page it parses out the basic stats 
+        for either the home or the road team, depending on the 
+        passed parameter.
+        Sometime the page doesn't include attendance in which case the 
+        method return None.
+        :team: inidcates if it team is home or away
+        :team_sn: the short name of the team
+        :return: attendance as an integer
+        """
+
+        table_finder = f'#box-{team_sn.upper()}-game-basic'
+
+        tb = self.__simple_parse(html, table_finder, txt=False)
+        tb_foot = self.__simple_parse(tb, 'tfoot', txt=False)
+
+        game_dic = {
+            'home_fg': int(self.__simple_parse(tb_foot, 'td[data-stat=fg]'))
+        }
+
+        game_dic['home_fg'] = int(home_basic.find('td[data-stat=fg]', first=True).text)
+        game_dic['home_fga'] = int(home_basic.find('td[data-stat=fga]', first=True).text)
+        game_dic['home_fg_pct'] = float(home_basic.find('td[data-stat=fg_pct]', first=True).text)
+        game_dic['home_fg3'] = int(home_basic.find('td[data-stat=fg3]', first=True).text)
+        game_dic['home_fg3a'] = int(home_basic.find('td[data-stat=fg3a]', first=True).text)
+        game_dic['home_fg3_pct'] = float(home_basic.find('td[data-stat=fg3_pct]', first=True).text)
+        game_dic['home_ft'] = int(home_basic.find('td[data-stat=ft]', first=True).text)
+        game_dic['home_fta'] = int(home_basic.find('td[data-stat=fta]', first=True).text)
+        game_dic['home_ft_pct'] = float(home_basic.find('td[data-stat=ft_pct]', first=True).text)
+        game_dic['home_orb'] = int(home_basic.find('td[data-stat=orb]', first=True).text)
+        game_dic['home_drb'] = int(home_basic.find('td[data-stat=drb]', first=True).text)
+        game_dic['home_trb'] = int(home_basic.find('td[data-stat=trb]', first=True).text)
+        game_dic['home_ast'] = int(home_basic.find('td[data-stat=ast]', first=True).text)
+        game_dic['home_stl'] = int(home_basic.find('td[data-stat=stl]', first=True).text)
+        game_dic['home_blk'] = int(home_basic.find('td[data-stat=blk]', first=True).text)
+        game_dic['home_tov'] = int(home_basic.find('td[data-stat=tov]', first=True).text)
+        game_dic['home_pf'] = int(home_basic.find('td[data-stat=pf]', first=True).text)
+        game_dic['home_pts'] = int(home_basic.find('td[data-stat=pts]', first=True).text)
 
 
 
