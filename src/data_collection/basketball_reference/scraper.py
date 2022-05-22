@@ -14,7 +14,6 @@ from basketball reference website.
 Author: Dominik Zulovec Sajovic, may 2022
 """
 
-# from requests import Request, Response
 from requests import Response
 from requests_html import HTMLSession, Element
 from datetime import datetime
@@ -121,82 +120,14 @@ class BasketballReference:
 
         game_dic = {**game_dic, **home_basic_dic, **away_basic_dic}
 
-        return game_dic
+        home_advanced_dic = self.__parse_advanced_stats(
+            game_page, 'home', home_team_sn)
 
-        # # home basic
-        # home_basic = game_page.html.find(f'#box-{home_team.upper()}-game-basic', first=True).find('tfoot', first=True)
-        # game_dic['home_fg'] = int(home_basic.find('td[data-stat=fg]', first=True).text)
-        # game_dic['home_fga'] = int(home_basic.find('td[data-stat=fga]', first=True).text)
-        # game_dic['home_fg_pct'] = float(home_basic.find('td[data-stat=fg_pct]', first=True).text)
-        # game_dic['home_fg3'] = int(home_basic.find('td[data-stat=fg3]', first=True).text)
-        # game_dic['home_fg3a'] = int(home_basic.find('td[data-stat=fg3a]', first=True).text)
-        # game_dic['home_fg3_pct'] = float(home_basic.find('td[data-stat=fg3_pct]', first=True).text)
-        # game_dic['home_ft'] = int(home_basic.find('td[data-stat=ft]', first=True).text)
-        # game_dic['home_fta'] = int(home_basic.find('td[data-stat=fta]', first=True).text)
-        # game_dic['home_ft_pct'] = float(home_basic.find('td[data-stat=ft_pct]', first=True).text)
-        # game_dic['home_orb'] = int(home_basic.find('td[data-stat=orb]', first=True).text)
-        # game_dic['home_drb'] = int(home_basic.find('td[data-stat=drb]', first=True).text)
-        # game_dic['home_trb'] = int(home_basic.find('td[data-stat=trb]', first=True).text)
-        # game_dic['home_ast'] = int(home_basic.find('td[data-stat=ast]', first=True).text)
-        # game_dic['home_stl'] = int(home_basic.find('td[data-stat=stl]', first=True).text)
-        # game_dic['home_blk'] = int(home_basic.find('td[data-stat=blk]', first=True).text)
-        # game_dic['home_tov'] = int(home_basic.find('td[data-stat=tov]', first=True).text)
-        # game_dic['home_pf'] = int(home_basic.find('td[data-stat=pf]', first=True).text)
-        # game_dic['home_pts'] = int(home_basic.find('td[data-stat=pts]', first=True).text)
+        away_advanced_dic = self.__parse_advanced_stats(
+            game_page, 'away', away_team_sn)
 
-        # # away basic
-        # away_basic = game_page.html.find(f'#box-{away_team.upper()}-game-basic', first=True).find('tfoot', first=True)
-        # game_dic['away_fg'] = int(away_basic.find('td[data-stat=fg]', first=True).text)
-        # game_dic['away_fga'] = int(away_basic.find('td[data-stat=fga]', first=True).text)
-        # game_dic['away_fg_pct'] = float(away_basic.find('td[data-stat=fg_pct]', first=True).text)
-        # game_dic['away_fg3'] = int(away_basic.find('td[data-stat=fg3]', first=True).text)
-        # game_dic['away_fg3a'] = int(away_basic.find('td[data-stat=fg3a]', first=True).text)
-        # game_dic['away_fg3_pct'] = float(away_basic.find('td[data-stat=fg3_pct]', first=True).text)
-        # game_dic['away_ft'] = int(away_basic.find('td[data-stat=ft]', first=True).text)
-        # game_dic['away_fta'] = int(away_basic.find('td[data-stat=fta]', first=True).text)
-        # game_dic['away_ft_pct'] = float(away_basic.find('td[data-stat=ft_pct]', first=True).text)
-        # game_dic['away_orb'] = int(away_basic.find('td[data-stat=orb]', first=True).text)
-        # game_dic['away_drb'] = int(away_basic.find('td[data-stat=drb]', first=True).text)
-        # game_dic['away_trb'] = int(away_basic.find('td[data-stat=trb]', first=True).text)
-        # game_dic['away_ast'] = int(away_basic.find('td[data-stat=ast]', first=True).text)
-        # game_dic['away_stl'] = int(away_basic.find('td[data-stat=stl]', first=True).text)
-        # game_dic['away_blk'] = int(away_basic.find('td[data-stat=blk]', first=True).text)
-        # game_dic['away_tov'] = int(away_basic.find('td[data-stat=tov]', first=True).text)
-        # game_dic['away_pf'] = int(away_basic.find('td[data-stat=pf]', first=True).text)
-        # game_dic['away_pts'] = int(away_basic.find('td[data-stat=pts]', first=True).text)
+        game_dic = {**game_dic, **home_advanced_dic, **away_advanced_dic}
 
-        # home advanced
-        home_advanced = game_page.html.find(f'#box-{home_team.upper()}-game-advanced', first=True).find('tfoot', first=True)
-        game_dic['home_ts_pct'] = float(home_advanced.find('td[data-stat=ts_pct]', first=True).text)
-        game_dic['home_efg_pct'] = float(home_advanced.find('td[data-stat=efg_pct]', first=True).text)
-        game_dic['home_fg3a_per_fga_pct'] = float(home_advanced.find('td[data-stat=fg3a_per_fga_pct]', first=True).text)
-        game_dic['home_fta_per_fga_pct'] = float(home_advanced.find('td[data-stat=fta_per_fga_pct]', first=True).text)
-        game_dic['home_orb_pct'] = float(home_advanced.find('td[data-stat=orb_pct]', first=True).text)
-        game_dic['home_drb_pct'] = float(home_advanced.find('td[data-stat=drb_pct]', first=True).text)
-        game_dic['home_trb_pct'] = float(home_advanced.find('td[data-stat=trb_pct]', first=True).text)
-        game_dic['home_ast_pct'] = float(home_advanced.find('td[data-stat=ast_pct]', first=True).text)
-        game_dic['home_stl_pct'] = float(home_advanced.find('td[data-stat=stl_pct]', first=True).text)
-        game_dic['home_blk_pct'] = float(home_advanced.find('td[data-stat=blk_pct]', first=True).text)
-        game_dic['home_tov_pct'] = float(home_advanced.find('td[data-stat=tov_pct]', first=True).text)
-        game_dic['home_off_rtg'] = float(home_advanced.find('td[data-stat=off_rtg]', first=True).text)
-        game_dic['home_def_rtg'] = float(home_advanced.find('td[data-stat=def_rtg]', first=True).text)
-
-        # away advanced
-        away_advanced = game_page.html.find(f'#box-{away_team.upper()}-game-advanced', first=True).find('tfoot', first=True)
-        game_dic['away_ts_pct'] = float(away_advanced.find('td[data-stat=ts_pct]', first=True).text)
-        game_dic['away_efg_pct'] = float(away_advanced.find('td[data-stat=efg_pct]', first=True).text)
-        game_dic['away_fg3a_per_fga_pct'] = float(away_advanced.find('td[data-stat=fg3a_per_fga_pct]', first=True).text)
-        game_dic['away_fta_per_fga_pct'] = float(away_advanced.find('td[data-stat=fta_per_fga_pct]', first=True).text)
-        game_dic['away_orb_pct'] = float(away_advanced.find('td[data-stat=orb_pct]', first=True).text)
-        game_dic['away_drb_pct'] = float(away_advanced.find('td[data-stat=drb_pct]', first=True).text)
-        game_dic['away_trb_pct'] = float(away_advanced.find('td[data-stat=trb_pct]', first=True).text)
-        game_dic['away_ast_pct'] = float(away_advanced.find('td[data-stat=ast_pct]', first=True).text)
-        game_dic['away_stl_pct'] = float(away_advanced.find('td[data-stat=stl_pct]', first=True).text)
-        game_dic['away_blk_pct'] = float(away_advanced.find('td[data-stat=blk_pct]', first=True).text)
-        game_dic['away_tov_pct'] = float(away_advanced.find('td[data-stat=tov_pct]', first=True).text)
-        game_dic['away_off_rtg'] = float(away_advanced.find('td[data-stat=off_rtg]', first=True).text)
-        game_dic['away_def_rtg'] = float(away_advanced.find('td[data-stat=def_rtg]', first=True).text)
-        
         return game_dic
     
     
@@ -304,17 +235,17 @@ class BasketballReference:
                     f"Couldn't scrape {url}. Status code: {page.status_code}")
 
     
-    def __simple_parse(self, html: Response, finder: str, txt: bool=True
+    def __simple_parse(self, html: Element, finder: str, txt: bool=True
     ) -> Union[str, Element]:
         """
-        Provided a response object with html and a CSS finder
+        Provided an HTML Element object and a CSS finder
         it parses out the text (or whole element) of the first element found.
         Sometime the page doesn't include attendance in which case the 
         method return None.
         :return: the text of the element
         """
 
-        ele = html.html.find(finder, first=True)
+        ele = html.find(finder, first=True)
         
         if txt:
             return ele.text
@@ -380,7 +311,7 @@ class BasketballReference:
         return None
 
 
-    def __parse_basic_stats(self, html: Response, team: str, team_sn: str
+    def __parse_basic_stats(self, page: Response, team: str, team_sn: str
                                     ) -> Dict[str, Union[int, float]]:
         """
         Provided the BR game page it parses out the basic stats 
@@ -392,7 +323,7 @@ class BasketballReference:
 
         table_finder = f'#box-{team_sn.upper()}-game-basic'
 
-        tb = self.__simple_parse(html, table_finder, txt=False)
+        tb = self.__simple_parse(page.html, table_finder, txt=False)
         tb_foot = self.__simple_parse(tb, 'tfoot', txt=False)
 
         game_dic = {
@@ -414,6 +345,61 @@ class BasketballReference:
             f'{team}_tov': int(self.__simple_parse(tb_foot, 'td[data-stat=tov]')),
             f'{team}_pf': int(self.__simple_parse(tb_foot, 'td[data-stat=pf]')),
             f'{team}_pts': int(self.__simple_parse(tb_foot, 'td[data-stat=pts]')),
+        }
+
+        return game_dic
+
+    
+    def __parse_advanced_stats(self, page: Response, team: str, team_sn: str
+                                    ) -> Dict[str, Union[int, float]]:
+        """
+        Provided the BR game page it parses out the advanced stats 
+        for either the home or the road team, depending on the 
+        passed parameter.
+        :team: inidcates if the team is home or away
+        :return: dictionary of basic stats
+        """
+
+        table_finder = f'#box-{team_sn.upper()}-game-advanced'
+
+        tb = self.__simple_parse(page.html, table_finder, txt=False)
+        tb_foot = self.__simple_parse(tb, 'tfoot', txt=False)
+
+        game_dic = {
+            f'{team}_fg': int(self.__simple_parse(tb_foot, 'td[data-stat=fg]')),
+            f'{team}_fga': int(self.__simple_parse(tb_foot, 'td[data-stat=fga]')),
+            f'{team}_fg_pct': float(self.__simple_parse(tb_foot, 'td[data-stat=fg_pct]')),
+            f'{team}_fg3': int(self.__simple_parse(tb_foot, 'td[data-stat=fg3]')),
+            f'{team}_fg3a': int(self.__simple_parse(tb_foot, 'td[data-stat=fg3a]')),
+            f'{team}_fg3_pct': float(self.__simple_parse(tb_foot, 'td[data-stat=fg3_pct]')),
+            f'{team}_ft': int(self.__simple_parse(tb_foot, 'td[data-stat=ft]')),
+            f'{team}_fta': int(self.__simple_parse(tb_foot, 'td[data-stat=fta]')),
+            f'{team}_ft_pct': float(self.__simple_parse(tb_foot, 'td[data-stat=ft_pct]')),
+            f'{team}_orb': int(self.__simple_parse(tb_foot, 'td[data-stat=orb]')),
+            f'{team}_drb': int(self.__simple_parse(tb_foot, 'td[data-stat=drb]')),
+            f'{team}_trb': int(self.__simple_parse(tb_foot, 'td[data-stat=trb]')),
+            f'{team}_ast': int(self.__simple_parse(tb_foot, 'td[data-stat=ast]')),
+            f'{team}_stl': int(self.__simple_parse(tb_foot, 'td[data-stat=stl]')),
+            f'{team}_blk': int(self.__simple_parse(tb_foot, 'td[data-stat=blk]')),
+            f'{team}_tov': int(self.__simple_parse(tb_foot, 'td[data-stat=tov]')),
+            f'{team}_pf': int(self.__simple_parse(tb_foot, 'td[data-stat=pf]')),
+            f'{team}_pts': int(self.__simple_parse(tb_foot, 'td[data-stat=pts]')),
+        }
+
+        game_dic = {
+            f'{team}_ts_pct': float(self.__simple_parse(tb_foot, 'td[data-stat=ts_pct]')),
+            f'{team}_efg_pct': float(self.__simple_parse(tb_foot, 'td[data-stat=efg_pct]')),
+            f'{team}_fg3a_per_fga_pct': float(self.__simple_parse(tb_foot, 'td[data-stat=fg3a_per_fga_pct]')),
+            f'{team}_fta_per_fga_pct': float(self.__simple_parse(tb_foot, 'td[data-stat=fta_per_fga_pct]')),
+            f'{team}_orb_pct': float(self.__simple_parse(tb_foot, 'td[data-stat=orb_pct]')),
+            f'{team}_drb_pct': float(self.__simple_parse(tb_foot, 'td[data-stat=drb_pct]')),
+            f'{team}_trb_pct': float(self.__simple_parse(tb_foot, 'td[data-stat=trb_pct]')),
+            f'{team}_ast_pct': float(self.__simple_parse(tb_foot, 'td[data-stat=ast_pct]')),
+            f'{team}_stl_pct': float(self.__simple_parse(tb_foot, 'td[data-stat=stl_pct]')),
+            f'{team}_blk_pct': float(self.__simple_parse(tb_foot, 'td[data-stat=blk_pct]')),
+            f'{team}_tov_pct': float(self.__simple_parse(tb_foot, 'td[data-stat=tov_pct]')),
+            f'{team}_off_rtg': float(self.__simple_parse(tb_foot, 'td[data-stat=off_rtg]')),
+            f'{team}_def_rtg': float(self.__simple_parse(tb_foot, 'td[data-stat=def_rtg]')),
         }
 
         return game_dic
