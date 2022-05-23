@@ -18,8 +18,6 @@ from requests import Response
 from requests_html import HTMLSession, Element
 from datetime import datetime
 from typing import Tuple, Optional, Dict, Union
-import pandas as pd
-import time
 
 
 class BasketballReference:
@@ -44,7 +42,7 @@ class BasketballReference:
         :return: returns a list of month urls from Basketball Reference
         """
 
-        main_page = self.__get_page(self.generate_season_games_url(year))
+        main_page = self._get_page(self.generate_season_games_url(year))
         all_months_urls = [
             self.base_url + a.attrs['href'] 
             for a in main_page.html.find('div.filter > div > a')]
@@ -62,7 +60,7 @@ class BasketballReference:
         element_finder = 'td[data-stat="box_score_text"]'
         game_urls = []
 
-        month_page = self.__get_page(page)
+        month_page = self._get_page(page)
         for td in month_page.html.find(element_finder):
             anch = td.find('a', first=True)
             if anch != None:
@@ -91,15 +89,15 @@ class BasketballReference:
         :return: returns a dictionary of game data
         """
 
-        game_page = self.__get_page(game_url)
+        game_page = self._get_page(game_url)
         
         # Team names 
-        home_team_fn, home_team_sn = self.__parse_team_name(game_page, 'home')
-        away_team_fn, away_team_sn = self.__parse_team_name(game_page, 'away')
+        home_team_fn, home_team_sn = self._parse_team_name(game_page, 'home')
+        away_team_fn, away_team_sn = self._parse_team_name(game_page, 'away')
 
         # game meta data
-        game_time, arena_name = self.__parse_game_meta_data(game_page)
-        attendance = self.__parse_attendance(game_page)
+        game_time, arena_name = self._parse_game_meta_data(game_page)
+        attendance = self._parse_attendance(game_page)
 
         game_dic = {
             'game_id':               game_url,
@@ -112,18 +110,18 @@ class BasketballReference:
             'attendance':            attendance
         }
 
-        home_basic_dic = self.__parse_basic_stats(
+        home_basic_dic = self._parse_basic_stats(
             game_page, 'home', home_team_sn)
 
-        away_basic_dic = self.__parse_basic_stats(
+        away_basic_dic = self._parse_basic_stats(
             game_page, 'away', away_team_sn)
 
         game_dic = {**game_dic, **home_basic_dic, **away_basic_dic}
 
-        home_advanced_dic = self.__parse_advanced_stats(
+        home_advanced_dic = self._parse_advanced_stats(
             game_page, 'home', home_team_sn)
 
-        away_advanced_dic = self.__parse_advanced_stats(
+        away_advanced_dic = self._parse_advanced_stats(
             game_page, 'away', away_team_sn)
 
         game_dic = {**game_dic, **home_advanced_dic, **away_advanced_dic}
@@ -131,96 +129,20 @@ class BasketballReference:
         return game_dic
     
     
-    def scrape_all_games_data(self, year: int, display_time:bool=True) -> list:
+    def scrape_multiple_games_data(self, game_urls: list) -> list:
         """
-        Scrapes the data for all the games in the given season
-        positional arguments:
-        :year: A year representing the year in which the NBA season ends
-        :display_time: if True will print the execution time
-        :return: returns a list of dictionaries for all the games in a season
+        Scrapes the data for all the game urls provided
+        :game_urls: list of box score game urls from basketball reference
+        :return: returns a list of dictionaries with game data
         """
-        start = time.time()
         
-        all_game_urls = self.scrape_all_game_urls(year)
-        
-        all_games = []
-        
-        for count, game_url in enumerate(all_game_urls):
-            dict_game_data = self.scrape_game_data(game_url, year, count)
-            all_games.append(dict_game_data)
-        
-        print(f"Scraped data for {len(all_games)} games")
+        return [self.scrape_game_data(url) for url in game_urls]
 
-        end = time.time()
-        
-        if display_time:
-            hours, rem = divmod(end-start, 3600)
-            minutes, seconds = divmod(rem, 60)
-            print(f"Complete Season Scrape Execution Time: {int(hours):0>2}:{int(minutes):0>2}:{seconds:05.2f}")
-            
-        return all_games
+    #######################
+    ### Private Methods ###
+    #######################
 
-
-    def scrape_season_schedule(self, year: int, display_time:bool=True) -> pd.DataFrame():
-        """
-        Scrapes the schedule for the entire season
-        positional arguments:
-        :year: A year representing the year in which the NBA season ends
-        :display_time: if True will print the execution time
-        :return: returns a list of game urls from Basketball Reference
-        """
-        start = time.time()
-
-        session = HTMLSession()
-
-        all_months_urls = self.scrape_all_month_urls(year)
-        all_scheduled_games = []
-
-        for schedule_month in all_months_urls:
-
-            month_page = session.get(schedule_month)
-
-            table_schedule = month_page.html.find('table[id="schedule"]', first=True).find('tbody', first=True)
-
-            for game_row in table_schedule.find('tr'):
-                game_dic = {}
-                game_date = game_row.find('th[data-stat="date_game"]', first=True).text
-                game_time = game_row.find('td[data-stat="game_start_time"]', first=True).text
-                game_time = game_time.replace('p', 'PM')
-                game_time = game_time.replace('a', 'AM')
-
-                visitor = game_row.find('td[data-stat="visitor_team_name"]', first=True)
-                away_team = visitor.text
-                away_team_short = visitor.attrs['csk'].split('.')[0]
-
-                home = game_row.find('td[data-stat="home_team_name"]', first=True)
-                home_team = home.text
-                home_team_short = home.attrs['csk'].split('.')[0]
-
-                game_time = datetime.strptime(f'{game_date.strip()} {game_time.strip()}', '%a, %b %d, %Y %I:%M%p')
-
-
-                game_dic['GAME_TIME'] = game_time
-                game_dic['HOME_TEAM'] = home_team
-                game_dic['HOME_TEAM_SHORT'] = home_team_short
-                game_dic['AWAY_TEAM'] = away_team
-                game_dic['AWAY_TEAM_SHORT'] = away_team_short
-
-                all_scheduled_games.append(game_dic)
-
-                end = time.time()
-
-        print(f'Scraped {len(all_scheduled_games)} games for the {year} season.')
-
-        if display_time:
-            hours, rem = divmod(end-start, 3600)
-            minutes, seconds = divmod(rem, 60)
-            print(f"Execution Time: {int(hours):0>2}:{int(minutes):0>2}:{seconds:05.2f}")
-
-        return pd.DataFrame(all_scheduled_games)
-
-
-    def __get_page(self, url: str) -> Response:
+    def _get_page(self, url: str) -> Response:
         """
         Makes a get request to the provided URL and 
         return a response if status code is ok (200).
@@ -235,7 +157,7 @@ class BasketballReference:
                     f"Couldn't scrape {url}. Status code: {page.status_code}")
 
     
-    def __simple_parse(self, html: Element, finder: str, txt: bool=True
+    def _simple_parse(self, html: Element, finder: str, txt: bool=True
     ) -> Union[str, Element]:
         """
         Provided an HTML Element object and a CSS finder
@@ -253,7 +175,7 @@ class BasketballReference:
             return ele
 
     
-    def __parse_team_name(self, html: Response, team: str) -> Tuple[str, str]:
+    def _parse_team_name(self, html: Response, team: str) -> Tuple[str, str]:
         """
         Provided the BR game page and the team parameter it parses out 
         the team short and long names.
@@ -275,7 +197,7 @@ class BasketballReference:
         return team_anchor.text, team_anchor.attrs['href'].split('/')[2]
 
 
-    def __parse_game_meta_data(self, html: Response) -> Tuple[datetime, str]:
+    def _parse_game_meta_data(self, html: Response) -> Tuple[datetime, str]:
         """
         Provided the BR game page it parses out the game time and 
         game arena name.
@@ -290,7 +212,7 @@ class BasketballReference:
         return game_time, arena_name
 
     
-    def __parse_attendance(self, html: Response) -> Optional[int]:
+    def _parse_attendance(self, html: Response) -> Optional[int]:
         """
         Provided the BR game page it parses out the game attendance.
         Sometime the page doesn't include attendance in which case the 
@@ -311,7 +233,7 @@ class BasketballReference:
         return None
 
 
-    def __parse_basic_stats(self, page: Response, team: str, team_sn: str
+    def _parse_basic_stats(self, page: Response, team: str, team_sn: str
                                     ) -> Dict[str, Union[int, float]]:
         """
         Provided the BR game page it parses out the basic stats 
@@ -323,34 +245,34 @@ class BasketballReference:
 
         table_finder = f'#box-{team_sn.upper()}-game-basic'
 
-        tb = self.__simple_parse(page.html, table_finder, txt=False)
-        tb_foot = self.__simple_parse(tb, 'tfoot', txt=False)
+        tb = self._simple_parse(page.html, table_finder, txt=False)
+        tb_foot = self._simple_parse(tb, 'tfoot', txt=False)
 
         game_dic = {
-            f'{team}_fg': int(self.__simple_parse(tb_foot, 'td[data-stat=fg]')),
-            f'{team}_fga': int(self.__simple_parse(tb_foot, 'td[data-stat=fga]')),
-            f'{team}_fg_pct': float(self.__simple_parse(tb_foot, 'td[data-stat=fg_pct]')),
-            f'{team}_fg3': int(self.__simple_parse(tb_foot, 'td[data-stat=fg3]')),
-            f'{team}_fg3a': int(self.__simple_parse(tb_foot, 'td[data-stat=fg3a]')),
-            f'{team}_fg3_pct': float(self.__simple_parse(tb_foot, 'td[data-stat=fg3_pct]')),
-            f'{team}_ft': int(self.__simple_parse(tb_foot, 'td[data-stat=ft]')),
-            f'{team}_fta': int(self.__simple_parse(tb_foot, 'td[data-stat=fta]')),
-            f'{team}_ft_pct': float(self.__simple_parse(tb_foot, 'td[data-stat=ft_pct]')),
-            f'{team}_orb': int(self.__simple_parse(tb_foot, 'td[data-stat=orb]')),
-            f'{team}_drb': int(self.__simple_parse(tb_foot, 'td[data-stat=drb]')),
-            f'{team}_trb': int(self.__simple_parse(tb_foot, 'td[data-stat=trb]')),
-            f'{team}_ast': int(self.__simple_parse(tb_foot, 'td[data-stat=ast]')),
-            f'{team}_stl': int(self.__simple_parse(tb_foot, 'td[data-stat=stl]')),
-            f'{team}_blk': int(self.__simple_parse(tb_foot, 'td[data-stat=blk]')),
-            f'{team}_tov': int(self.__simple_parse(tb_foot, 'td[data-stat=tov]')),
-            f'{team}_pf': int(self.__simple_parse(tb_foot, 'td[data-stat=pf]')),
-            f'{team}_pts': int(self.__simple_parse(tb_foot, 'td[data-stat=pts]')),
+            f'{team}_fg': int(self._simple_parse(tb_foot, 'td[data-stat=fg]')),
+            f'{team}_fga': int(self._simple_parse(tb_foot, 'td[data-stat=fga]')),
+            f'{team}_fg_pct': float(self._simple_parse(tb_foot, 'td[data-stat=fg_pct]')),
+            f'{team}_fg3': int(self._simple_parse(tb_foot, 'td[data-stat=fg3]')),
+            f'{team}_fg3a': int(self._simple_parse(tb_foot, 'td[data-stat=fg3a]')),
+            f'{team}_fg3_pct': float(self._simple_parse(tb_foot, 'td[data-stat=fg3_pct]')),
+            f'{team}_ft': int(self._simple_parse(tb_foot, 'td[data-stat=ft]')),
+            f'{team}_fta': int(self._simple_parse(tb_foot, 'td[data-stat=fta]')),
+            f'{team}_ft_pct': float(self._simple_parse(tb_foot, 'td[data-stat=ft_pct]')),
+            f'{team}_orb': int(self._simple_parse(tb_foot, 'td[data-stat=orb]')),
+            f'{team}_drb': int(self._simple_parse(tb_foot, 'td[data-stat=drb]')),
+            f'{team}_trb': int(self._simple_parse(tb_foot, 'td[data-stat=trb]')),
+            f'{team}_ast': int(self._simple_parse(tb_foot, 'td[data-stat=ast]')),
+            f'{team}_stl': int(self._simple_parse(tb_foot, 'td[data-stat=stl]')),
+            f'{team}_blk': int(self._simple_parse(tb_foot, 'td[data-stat=blk]')),
+            f'{team}_tov': int(self._simple_parse(tb_foot, 'td[data-stat=tov]')),
+            f'{team}_pf': int(self._simple_parse(tb_foot, 'td[data-stat=pf]')),
+            f'{team}_pts': int(self._simple_parse(tb_foot, 'td[data-stat=pts]')),
         }
 
         return game_dic
 
     
-    def __parse_advanced_stats(self, page: Response, team: str, team_sn: str
+    def _parse_advanced_stats(self, page: Response, team: str, team_sn: str
                                     ) -> Dict[str, Union[int, float]]:
         """
         Provided the BR game page it parses out the advanced stats 
@@ -362,44 +284,23 @@ class BasketballReference:
 
         table_finder = f'#box-{team_sn.upper()}-game-advanced'
 
-        tb = self.__simple_parse(page.html, table_finder, txt=False)
-        tb_foot = self.__simple_parse(tb, 'tfoot', txt=False)
+        tb = self._simple_parse(page.html, table_finder, txt=False)
+        tb_foot = self._simple_parse(tb, 'tfoot', txt=False)
 
         game_dic = {
-            f'{team}_fg': int(self.__simple_parse(tb_foot, 'td[data-stat=fg]')),
-            f'{team}_fga': int(self.__simple_parse(tb_foot, 'td[data-stat=fga]')),
-            f'{team}_fg_pct': float(self.__simple_parse(tb_foot, 'td[data-stat=fg_pct]')),
-            f'{team}_fg3': int(self.__simple_parse(tb_foot, 'td[data-stat=fg3]')),
-            f'{team}_fg3a': int(self.__simple_parse(tb_foot, 'td[data-stat=fg3a]')),
-            f'{team}_fg3_pct': float(self.__simple_parse(tb_foot, 'td[data-stat=fg3_pct]')),
-            f'{team}_ft': int(self.__simple_parse(tb_foot, 'td[data-stat=ft]')),
-            f'{team}_fta': int(self.__simple_parse(tb_foot, 'td[data-stat=fta]')),
-            f'{team}_ft_pct': float(self.__simple_parse(tb_foot, 'td[data-stat=ft_pct]')),
-            f'{team}_orb': int(self.__simple_parse(tb_foot, 'td[data-stat=orb]')),
-            f'{team}_drb': int(self.__simple_parse(tb_foot, 'td[data-stat=drb]')),
-            f'{team}_trb': int(self.__simple_parse(tb_foot, 'td[data-stat=trb]')),
-            f'{team}_ast': int(self.__simple_parse(tb_foot, 'td[data-stat=ast]')),
-            f'{team}_stl': int(self.__simple_parse(tb_foot, 'td[data-stat=stl]')),
-            f'{team}_blk': int(self.__simple_parse(tb_foot, 'td[data-stat=blk]')),
-            f'{team}_tov': int(self.__simple_parse(tb_foot, 'td[data-stat=tov]')),
-            f'{team}_pf': int(self.__simple_parse(tb_foot, 'td[data-stat=pf]')),
-            f'{team}_pts': int(self.__simple_parse(tb_foot, 'td[data-stat=pts]')),
-        }
-
-        game_dic = {
-            f'{team}_ts_pct': float(self.__simple_parse(tb_foot, 'td[data-stat=ts_pct]')),
-            f'{team}_efg_pct': float(self.__simple_parse(tb_foot, 'td[data-stat=efg_pct]')),
-            f'{team}_fg3a_per_fga_pct': float(self.__simple_parse(tb_foot, 'td[data-stat=fg3a_per_fga_pct]')),
-            f'{team}_fta_per_fga_pct': float(self.__simple_parse(tb_foot, 'td[data-stat=fta_per_fga_pct]')),
-            f'{team}_orb_pct': float(self.__simple_parse(tb_foot, 'td[data-stat=orb_pct]')),
-            f'{team}_drb_pct': float(self.__simple_parse(tb_foot, 'td[data-stat=drb_pct]')),
-            f'{team}_trb_pct': float(self.__simple_parse(tb_foot, 'td[data-stat=trb_pct]')),
-            f'{team}_ast_pct': float(self.__simple_parse(tb_foot, 'td[data-stat=ast_pct]')),
-            f'{team}_stl_pct': float(self.__simple_parse(tb_foot, 'td[data-stat=stl_pct]')),
-            f'{team}_blk_pct': float(self.__simple_parse(tb_foot, 'td[data-stat=blk_pct]')),
-            f'{team}_tov_pct': float(self.__simple_parse(tb_foot, 'td[data-stat=tov_pct]')),
-            f'{team}_off_rtg': float(self.__simple_parse(tb_foot, 'td[data-stat=off_rtg]')),
-            f'{team}_def_rtg': float(self.__simple_parse(tb_foot, 'td[data-stat=def_rtg]')),
+            f'{team}_ts_pct': float(self._simple_parse(tb_foot, 'td[data-stat=ts_pct]')),
+            f'{team}_efg_pct': float(self._simple_parse(tb_foot, 'td[data-stat=efg_pct]')),
+            f'{team}_fg3a_per_fga_pct': float(self._simple_parse(tb_foot, 'td[data-stat=fg3a_per_fga_pct]')),
+            f'{team}_fta_per_fga_pct': float(self._simple_parse(tb_foot, 'td[data-stat=fta_per_fga_pct]')),
+            f'{team}_orb_pct': float(self._simple_parse(tb_foot, 'td[data-stat=orb_pct]')),
+            f'{team}_drb_pct': float(self._simple_parse(tb_foot, 'td[data-stat=drb_pct]')),
+            f'{team}_trb_pct': float(self._simple_parse(tb_foot, 'td[data-stat=trb_pct]')),
+            f'{team}_ast_pct': float(self._simple_parse(tb_foot, 'td[data-stat=ast_pct]')),
+            f'{team}_stl_pct': float(self._simple_parse(tb_foot, 'td[data-stat=stl_pct]')),
+            f'{team}_blk_pct': float(self._simple_parse(tb_foot, 'td[data-stat=blk_pct]')),
+            f'{team}_tov_pct': float(self._simple_parse(tb_foot, 'td[data-stat=tov_pct]')),
+            f'{team}_off_rtg': float(self._simple_parse(tb_foot, 'td[data-stat=off_rtg]')),
+            f'{team}_def_rtg': float(self._simple_parse(tb_foot, 'td[data-stat=def_rtg]')),
         }
 
         return game_dic
