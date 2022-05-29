@@ -11,28 +11,26 @@ from basketball reference website.
 - Scrape all playoff games in a year
     - https://www.basketball-reference.com/playoffs/NBA_2022_games.html
 
-Author: Dominik Zulovec Sajovic, may 2022
+Author: Dominik Zulovec Sajovic, May 2022
 """
 
+from dataclasses import dataclass
 from requests import Response
 from requests_html import HTMLSession, Element
 from datetime import datetime
 from typing import Tuple, Optional, Dict, Union
 
 
+@dataclass
 class BasketballReference:
     """ Class for scraping basketball-reference.com """
     
-    base_url = None
+    base_url: str = 'https://www.basketball-reference.com'
     
-    def __init__(self):
-        """ Initializes the class """
-        self.base_url = 'https://www.basketball-reference.com'
-        
-        
-    def generate_season_games_url(self, year: int) -> str:
+    @classmethod
+    def generate_season_games_url(cls, year: int) -> str:
         """ Generates the url for all games in a year """
-        return f'{self.base_url}/leagues/NBA_{year}_games.html'
+        return f'{cls.base_url}/leagues/NBA_{year}_games.html'
 
     
     def scrape_all_months_urls(self, year: int) -> list:
@@ -43,11 +41,9 @@ class BasketballReference:
         """
 
         main_page = self._get_page(self.generate_season_games_url(year))
-        all_months_urls = [
+        return [
             self.base_url + a.attrs['href'] 
             for a in main_page.html.find('div.filter > div > a')]
-
-        return all_months_urls
     
 
     def scrape_game_urls(self, page: str) -> list:
@@ -142,7 +138,8 @@ class BasketballReference:
     ### Private Methods ###
     #######################
 
-    def _get_page(self, url: str) -> Response:
+    @staticmethod
+    def _get_page(url: str) -> Response:
         """
         Makes a get request to the provided URL and 
         return a response if status code is ok (200).
