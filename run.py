@@ -26,15 +26,25 @@ import sys
 
 from datetime import date
 from src.utils.date_utils import valid_date
+from src.utils.error_utils import IllegalArgumentError
+from settings.settings import Settings
 from src.data_collection.data_collection_manager import \
-    run_data_collection_manager
+    run_daily_game_collector, run_team_collector, run_player_collector, \
+    run_season_games_collector, run_playoffs_game_collector
+
 
 def main(args: argparse.Namespace):
     """ The main entry point into the project """
 
+    
+
+    # Load the settings
+    # # TODO: Load the settings
+    settings = args.settings
+
+    # # TODO: load the logger directly from the settings
     logger = logging.getLogger('blogger')
     logger.setLevel(logging.DEBUG)
-
     handler = logging.StreamHandler(sys.stdout)
     handler.setLevel(logging.DEBUG)
     formatter = logging.Formatter(
@@ -42,9 +52,32 @@ def main(args: argparse.Namespace):
     handler.setFormatter(formatter)
     logger.addHandler(handler)
 
-    # TODO: add if/else for run based on arguments
+    # # TODO: Handle the default arguments (bake them into the settings)
+    # # args.date
+    # # args.namechar
+    # # args.year
 
-    run_data_collection_manager(args.settings, logger)
+    # Run the data collection
+    collected = None
+
+    if args.type == 'g':
+        collected = run_daily_game_collector(settings)
+    elif args.type == 't':
+        collected = run_team_collector(settings)
+    elif args.type == 'p':
+        collected = run_player_collector(settings)
+    elif args.type == 'gs':
+        collected = run_season_games_collector(settings)
+    elif args.type == 'gp':
+        collected = run_playoffs_game_collector(settings)
+    else:
+        raise IllegalArgumentError(
+            f'{args.type} is not a valid value for the type (-t) argument. '
+            f'Choose one of the following: g, t, p, gs, gp.'
+            )
+
+    # Run the data saving
+    # TODO: Implement the data saving code
 
 
 if __name__ == "__main__":
@@ -113,8 +146,7 @@ if __name__ == "__main__":
     )
 
     # TODO: add arguments for saving preference (csv, pg db, sqlite)
+
     args = parser.parse_args()
 
-    print(args)
-
-    # main(args)
+    main(args)
