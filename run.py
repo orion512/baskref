@@ -21,8 +21,6 @@ Author: Dominik Zulovec Sajovic, May 2022
 
 import os
 import argparse
-import logging
-import sys
 
 from datetime import date
 from yaml import safe_load
@@ -40,41 +38,35 @@ def main(args: argparse.Namespace):
 
     # Load the settings
     with open(args.settings) as f:
-        settings = from_dict(Settings, safe_load(f))
+        sett_dict = safe_load(f)
+    
+    sett_dict['in_line'] = {
+        'type': args.type,
+        'date': args.date,
+        'namechar': args.namechar,
+        'year': args.year,
+    }
 
-    # # TODO: load the logger directly from the settings
-    logger = logging.getLogger('blogger')
-    logger.setLevel(logging.DEBUG)
-    handler = logging.StreamHandler(sys.stdout)
-    handler.setLevel(logging.DEBUG)
-    formatter = logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-
-    # # TODO: Handle the default arguments (bake them into the settings)
-    # # args.date
-    # # args.namechar
-    # # args.year
+    settings = from_dict(Settings, sett_dict)
 
     # Run the data collection
 
     collected = None
 
-    if args.type == 'g':
+    if settings.in_line.type == 'g':
         collected = run_daily_game_collector(settings)
-    elif args.type == 't':
+    elif settings.in_line.type == 't':
         collected = run_team_collector(settings)
-    elif args.type == 'p':
+    elif settings.in_line.type == 'p':
         collected = run_player_collector(settings)
-    elif args.type == 'gs':
+    elif settings.in_line.type == 'gs':
         collected = run_season_games_collector(settings)
-    elif args.type == 'gp':
+    elif settings.in_line.type == 'gp':
         collected = run_playoffs_game_collector(settings)
     else:
         raise IllegalArgumentError(
-            f'{args.type} is not a valid value for the type (-t) argument. '
-            f'Choose one of the following: g, t, p, gs, gp.'
+            f'{settings.in_line.type} is not a valid value for the type ',
+            f'(-t) argument. Choose one of the following: g, t, p, gs, gp.'
             )
 
     # Run the data saving

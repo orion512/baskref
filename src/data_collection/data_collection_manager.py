@@ -20,6 +20,8 @@ def run_daily_game_collector(settings: Settings) -> dict:
     print(settings)
     print(f'I am collecting all games on this day: __')
 
+    settings.logger.logger.debug('Testiram')
+
     return {}
 
 
