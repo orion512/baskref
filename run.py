@@ -25,6 +25,8 @@ import logging
 import sys
 
 from datetime import date
+from yaml import safe_load
+from dacite import from_dict
 from src.utils.date_utils import valid_date
 from src.utils.error_utils import IllegalArgumentError
 from settings.settings import Settings
@@ -36,11 +38,9 @@ from src.data_collection.data_collection_manager import \
 def main(args: argparse.Namespace):
     """ The main entry point into the project """
 
-    
-
     # Load the settings
-    # # TODO: Load the settings
-    settings = args.settings
+    with open(args.settings) as f:
+        settings = from_dict(Settings, safe_load(f))
 
     # # TODO: load the logger directly from the settings
     logger = logging.getLogger('blogger')
@@ -58,6 +58,7 @@ def main(args: argparse.Namespace):
     # # args.year
 
     # Run the data collection
+
     collected = None
 
     if args.type == 'g':
@@ -87,7 +88,7 @@ if __name__ == "__main__":
     parser.add_argument(
         '-s', '--settings', 
         help='Path to Settings YAML File', 
-        default=os.path.join('settings', 'settings.py'),
+        default=os.path.join('settings', 'settings.yaml'),
         type=str
     )
     

@@ -15,8 +15,12 @@ from src.data_collection.basketball_reference.scraper import \
     BasketballReference
 
 
-def run_daily_game_collector():
-    pass
+def run_daily_game_collector(settings: Settings) -> dict:
+
+    print(settings)
+    print(f'I am collecting all games on this day: __')
+
+    return {}
 
 
 def run_team_collector():
