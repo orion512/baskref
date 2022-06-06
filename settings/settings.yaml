@@ -2,5 +2,4 @@
 environment:
   name: 'dev'
 
-logger:
-  level: 'DEBUG'
+logging_level: 'DEBUG'

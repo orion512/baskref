@@ -16,11 +16,14 @@ from src.data_collection.basketball_reference.scraper import \
 
 
 def run_daily_game_collector(settings: Settings) -> dict:
+    """
+    This function orchestrates the collection of NBA games on
+    a specific day.
+    """
 
-    print(settings)
-    print(f'I am collecting all games on this day: __')
-
-    settings.logger.logger.debug('Testiram')
+    settings.logger.debug(settings)
+    settings.logger.debug(
+        f'I am collecting all games on this day: {settings.in_line.date}')
 
     return {}
 

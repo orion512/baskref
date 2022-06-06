@@ -17,24 +17,8 @@ class Environment:
 
 
 @dataclass
-class ProjectLogger:
-    level: str
-    logger: Union[logging.Logger, None]
-
-    def __post_init__(self):
-        """ ... """
-        self.logger = logging.getLogger('blogger')
-        self.logger.setLevel(self.level)
-        handler = logging.StreamHandler(sys.stdout)
-        handler.setLevel(self.level)
-        formatter = logging.Formatter(
-            '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        handler.setFormatter(formatter)
-        self.logger.addHandler(handler)
-
-
-@dataclass
 class InLine:
+    """ Class for storing arguments passed in-line to run.py """
     type: str
     date: date
     namechar: str
@@ -47,4 +31,20 @@ class Settings:
 
     environment: Environment
     in_line: InLine
-    logger: ProjectLogger
+    logging_level: str
+    logger: Union[None, logging.Logger]
+
+    def __post_init__(self):
+        """ ... """
+        self.logger = logging.getLogger('blogger')
+        self.logger.setLevel(self.logging_level)
+        handler = logging.StreamHandler(sys.stdout)
+        handler.setLevel(self.logging_level)
+        formatter = logging.Formatter(
+            "%(asctime)s\t"
+            "%(levelname)s\t"
+            "%(pathname)s:%(lineno)d\t"
+            "%(message)s"
+        )
+        handler.setFormatter(formatter)
+        self.logger.addHandler(handler)
