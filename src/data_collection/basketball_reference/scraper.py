@@ -17,7 +17,7 @@ Author: Dominik Zulovec Sajovic, May 2022
 from dataclasses import dataclass
 from requests import Response
 from requests_html import HTMLSession, Element
-from datetime import datetime
+from datetime import datetime, date
 from typing import Tuple, Optional, Dict, Union
 
 
@@ -33,6 +33,30 @@ class BasketballReference:
         return f'{cls.base_url}/leagues/NBA_{year}_games.html'
 
     
+    @classmethod
+    def generate_daily_games_url(cls, date: date) -> str:
+        """ Generates the url for all games in a given day """
+        # TODO: add logic to encode date into URL
+        return f'{cls.base_url}/boxscores/?month=05&day=6&year=2022'
+
+
+    def scrape_game_urls_day(self, date: date) -> list:
+        """
+        """
+        element_finder = 'td[data-stat="box_score_text"]'
+        game_urls = []
+
+        day_page = self._get_page(self.generate_daily_games_url(date))
+        for td in day_page.html.find(element_finder):
+            # TODO: logicto scrape game urls
+            # anch = td.find('a', first=True)
+            # if anch != None:
+            #     url =  anch.find('a', first=True).attrs['href']
+            #     game_urls.append(self.base_url + url)
+
+        return game_urls
+
+    
     def scrape_all_months_urls(self, year: int) -> list:
         """
         Scrapes the urls to every month of a given NBA season
@@ -46,9 +70,9 @@ class BasketballReference:
             for a in main_page.html.find('div.filter > div > a')]
     
 
-    def scrape_game_urls(self, page: str) -> list:
+    def scrape_game_urls_month(self, page: str) -> list:
         """
-        Scrapes the urls to every game (boxscore) from the webpage
+        Scrapes the urls to every game (boxscore) from the month webpage.
         :page: web page - /leagues/NBA_YEAR_games-MONTH.html
         :return: returns a list of game urls from Basketball Reference
         """
@@ -66,7 +90,7 @@ class BasketballReference:
         return game_urls
 
     
-    def scrape_multiple_game_url_pages(self, game_list_urls: list) -> list:
+    def scrape_multiple_game_urls_month(self, game_list_urls: list) -> list:
         """
         Scrapes multiple pages for urls to every game (boxscore).
         :game_list_urls: list of URLs containing list of games
@@ -75,7 +99,7 @@ class BasketballReference:
 
         return [
             gurl for url in game_list_urls 
-            for gurl in self.scrape_game_urls(url)]
+            for gurl in self.scrape_game_urls_month(url)]
 
 
     def scrape_game_data(self, game_url: str) -> dict:

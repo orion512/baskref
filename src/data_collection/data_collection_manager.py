@@ -21,9 +21,15 @@ def run_daily_game_collector(settings: Settings) -> dict:
     a specific day.
     """
 
-    settings.logger.debug(settings)
-    settings.logger.debug(
-        f'I am collecting all games on this day: {settings.in_line.date}')
+    settings.logger.debug(f'Collecting all games for: {settings.in_line.date}')
+    br = BasketballReference()
+
+    # 1. Get all the game urls for the specific day
+    game_urls = br.scrape_game_urls_day(settings.in_line.date)
+    settings.logger.info(f'Scraped {len(game_urls)} game urls')
+
+    # 2. Scrape the list of games
+
 
     return {}
 
