@@ -14,6 +14,8 @@ from basketball reference website.
 Author: Dominik Zulovec Sajovic, May 2022
 """
 
+import urllib.parse
+
 from dataclasses import dataclass
 from requests import Response
 from requests_html import HTMLSession, Element
@@ -36,23 +38,32 @@ class BasketballReference:
     @classmethod
     def generate_daily_games_url(cls, date: date) -> str:
         """ Generates the url for all games in a given day """
-        # TODO: add logic to encode date into URL
-        return f'{cls.base_url}/boxscores/?month=05&day=6&year=2022'
+
+        params = urllib.parse.urlencode({
+            'month': date.month,
+            'day': date.day,
+            'year': date.year
+        })
+        
+        return f'{cls.base_url}/boxscores/?{params}'
 
 
     def scrape_game_urls_day(self, date: date) -> list:
         """
+        Scrapes the urls to every game's boxscore on a specific day.
+        :date: A date to scrape games on
+        :return: a list of basketball reference urls
         """
-        element_finder = 'td[data-stat="box_score_text"]'
+        element_finder = 'div.game_summary > p.links'
+        
         game_urls = []
-
+        
         day_page = self._get_page(self.generate_daily_games_url(date))
-        for td in day_page.html.find(element_finder):
-            # TODO: logicto scrape game urls
-            # anch = td.find('a', first=True)
-            # if anch != None:
-            #     url =  anch.find('a', first=True).attrs['href']
-            #     game_urls.append(self.base_url + url)
+        for p in day_page.html.find(element_finder):
+            anch = p.find('a', first=True)
+            if anch != None:
+                url = anch.attrs['href']
+                game_urls.append(self.base_url + url)
 
         return game_urls
 

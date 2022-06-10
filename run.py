@@ -69,6 +69,8 @@ def main(args: argparse.Namespace):
             f'(-t) argument. Choose one of the following: g, t, p, gs, gp.'
             )
 
+    print(collected)
+
     # Run the data saving
     # TODO: Implement the data saving code
 

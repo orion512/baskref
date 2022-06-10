@@ -29,9 +29,10 @@ def run_daily_game_collector(settings: Settings) -> dict:
     settings.logger.info(f'Scraped {len(game_urls)} game urls')
 
     # 2. Scrape the list of games
+    game_data = br.scrape_multiple_games_data(game_urls)
+    settings.logger.info(f'Scraped {len(game_data)} games')
 
-
-    return {}
+    return game_data
 
 
 def run_team_collector():
