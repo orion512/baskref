@@ -13,6 +13,7 @@ from datetime import date
 
 @dataclass
 class Environment:
+    """ Class for environmental settings """
     name: str
 
 
@@ -23,6 +24,12 @@ class InLine:
     date: date
     namechar: str
     year: int
+
+
+@dataclass
+class Saver:
+    """ Class for data saving settings """
+    file_bucket: str
 
 
 @dataclass

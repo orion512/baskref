@@ -70,6 +70,8 @@ def main(args: argparse.Namespace):
             )
 
     print(collected)
+    import pandas as pd
+    pd.DataFrame(game_data).to_csv('test.csv', index=False)
 
     # Run the data saving
     # TODO: Implement the data saving code
@@ -140,7 +142,7 @@ if __name__ == "__main__":
         type=int
     )
 
-    # TODO: add arguments for saving preference (csv, pg db, sqlite)
+    # TODO: add arguments for saving preference (csv, pg db)
 
     args = parser.parse_args()
 
