@@ -1,21 +1,53 @@
 """
-This is the maanger script which orchestrates the data collection.
-It is agnostic to the method fo collection & source of the data:
-    - scraping a website
-    - api
-    - another database
+This is the manager script which orchestrates the data collection.
+
+This script is meant to have several modes of running.
+- Daily scrape
+- Yearly scrape
+- Yearly Playoff scrape
+- teams scrape
+- players scrape
+- (potentially in the future) date range scrape
+
+type of scraping -t
+    g -> to scrape daily games (-d for date)
+    t -> to scrape all teams
+    p -> to scrape all players (-n for last name char)
+    gs -> to scrape all games in a year (-y for year)
+    gp -> to scrape all playoff games in a year (-y for year)
 
 Author: Dominik Zulovec Sajovic, May 2022
 """
 
 from typing import Dict, List
 
+from src.utils.error_utils import IllegalArgumentError
 from settings.settings import Settings
 from src.data_collection.basketball_reference.scraper import \
     BasketballReference
 
 
-def run_daily_game_collector(settings: Settings) -> dict:
+def run_data_collection_manager(settings: Settings) -> list:
+    """ ... """
+
+    if settings.in_line.type == 'g':
+        return run_daily_game_collector(settings)
+    elif settings.in_line.type == 't':
+        return run_team_collector(settings)
+    elif settings.in_line.type == 'p':
+        return run_player_collector(settings)
+    elif settings.in_line.type == 'gs':
+        return run_season_games_collector(settings)
+    elif settings.in_line.type == 'gp':
+        return run_playoffs_game_collector(settings)
+    else:
+        raise IllegalArgumentError(
+            f'{settings.in_line.type} is not a valid value for the type ',
+            f'(-t) argument. Choose one of the following: g, t, p, gs, gp.'
+            )
+    
+
+def run_daily_game_collector(settings: Settings) -> list:
     """
     This function orchestrates the collection of NBA games on
     a specific day.
@@ -44,8 +76,8 @@ def run_player_collector():
     pass
 
 
-def run_season_games_collector(settings: Settings) -> Dict[str, List]:
-    """ Integrates the data collection layer jobs together """
+def run_season_games_collector(settings: Settings) -> list:
+    """ Orchestrates the collection of all games in a season """
 
     settings.logger.info(f'SEASON GAME COLLECTOR MODE')
     settings.logger.info(f'Collecting all games for: {settings.in_line.year}')

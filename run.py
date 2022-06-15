@@ -1,20 +1,5 @@
 """
-This script is meant to have 2 modes of running.
-- Daily scrape
-- Yearly scrape
-- (potentially in the future) date range scrape
-
-Depending on the passed argument the data can get saved in:
-- CSV
-- PostgreSQL
-- SQLite
-
-type of scraping -t
-    g -> to scrape daily games (-d for date)
-    t -> to scrape all teams
-    p -> to scrape all players (-n for last name char)
-    gs -> to scrape all games in a year (-y for year)
-    gp -> to scrape all playoff games in a year (-y for year)
+This script is the main entrace to the project.
 
 Author: Dominik Zulovec Sajovic, May 2022
 """
@@ -26,12 +11,11 @@ from datetime import date
 from yaml import safe_load
 from dacite import from_dict
 from src.utils.date_utils import valid_date
-from src.utils.error_utils import IllegalArgumentError
 from settings.settings import Settings
 from src.data_collection.data_collection_manager import \
-    run_daily_game_collector, run_team_collector, run_player_collector, \
-    run_season_games_collector, run_playoffs_game_collector
-
+    run_data_collection_manager
+from src.data_saving.data_saver_manager import \
+    run_data_saver_manager
 
 def main(args: argparse.Namespace):
     """ The main entry point into the project """
@@ -49,32 +33,13 @@ def main(args: argparse.Namespace):
 
     settings = from_dict(Settings, sett_dict)
 
-    # Run the data collection
+    # Run the main packages
+    # # 1. Run the data collection
+    collected = run_data_collection_manager(settings)
+    
+    # # 2. Run the data saver
+    run_data_saver_manager(settings, collected)
 
-    collected = None
-
-    if settings.in_line.type == 'g':
-        collected = run_daily_game_collector(settings)
-    elif settings.in_line.type == 't':
-        collected = run_team_collector(settings)
-    elif settings.in_line.type == 'p':
-        collected = run_player_collector(settings)
-    elif settings.in_line.type == 'gs':
-        collected = run_season_games_collector(settings)
-    elif settings.in_line.type == 'gp':
-        collected = run_playoffs_game_collector(settings)
-    else:
-        raise IllegalArgumentError(
-            f'{settings.in_line.type} is not a valid value for the type ',
-            f'(-t) argument. Choose one of the following: g, t, p, gs, gp.'
-            )
-
-    print(collected)
-    import pandas as pd
-    pd.DataFrame(game_data).to_csv('test.csv', index=False)
-
-    # Run the data saving
-    # TODO: Implement the data saving code
 
 
 if __name__ == "__main__":
