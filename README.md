@@ -40,6 +40,12 @@ deactivate
 
 ## How to Run?
 
+Scrape all games for the 7th of January 2022.
+```
+python run.py -t g -d 2022-01-07
+```
+
+
 ## How to Run Tests?
 
 ## Project Structure
