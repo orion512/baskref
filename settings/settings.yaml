@@ -1,0 +1,8 @@
+
+environment:
+  name: 'dev'
+
+logging_level: 'DEBUG'
+
+saver:
+  file_bucket: 'datasets'
