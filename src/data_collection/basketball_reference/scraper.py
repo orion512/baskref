@@ -21,11 +21,12 @@ from requests import Response
 from requests_html import HTMLSession, Element
 from datetime import datetime, date
 from typing import Tuple, Optional, Dict, Union
+from urllib import parse
 
 
 @dataclass
 class BasketballReference:
-    """ Class for scraping basketball-reference.com """
+    """ Class for scraping & Parsing basketball-reference.com """
     
     base_url: str = 'https://www.basketball-reference.com'
     
@@ -130,15 +131,18 @@ class BasketballReference:
         game_time, arena_name = self._parse_game_meta_data(game_page)
         attendance = self._parse_attendance(game_page)
 
+        game_id = self._parse_game_id(game_url)
+
         game_dic = {
-            'game_id':               game_url,
+            'game_id':               game_id,
             'home_team':             home_team_sn,
             'away_team':             away_team_sn,
             'home_team_full_name':   home_team_fn,
             'away_team_full_name':   away_team_fn,
             'game_time':             game_time,
             'arena_name':            arena_name,
-            'attendance':            attendance
+            'attendance':            attendance,
+            'game_url':              game_url
         }
 
         home_basic_dic = self._parse_basic_stats(
@@ -263,6 +267,14 @@ class BasketballReference:
             return attendance
 
         return None
+
+    def _parse_game_id(self, game_url: str) -> str:
+        """
+        Provided a BR game url it parses out the game id.
+        :return: game id as a string.
+        """
+
+        return parse.urlsplit(game_url).path.split('/')[-1].replace('.html', '') 
 
 
     def _parse_basic_stats(self, page: Response, team: str, team_sn: str

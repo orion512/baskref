@@ -5,4 +5,4 @@ environment:
 logging_level: 'DEBUG'
 
 saver:
-  file_bucket: '/datasets/'
+  file_bucket: 'datasets'

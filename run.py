@@ -29,6 +29,8 @@ def main(args: argparse.Namespace):
         'date': args.date,
         'namechar': args.namechar,
         'year': args.year,
+        'save': args.save,
+        'file_path': args.file_path,
     }
 
     settings = from_dict(Settings, sett_dict)
@@ -105,6 +107,30 @@ if __name__ == "__main__":
         """, 
         default=date.today().year,
         type=int
+    )
+
+    parser.add_argument(
+        '-sv', '--save', 
+        help="""
+        Specify the type of data saving (
+            f - saved the file into a CSV
+            db - saved the data into a postgres DB
+        )
+        """, 
+        choices=['f', 'db'],
+        default='f',
+        type=str
+    )
+
+    parser.add_argument(
+        '-fp', '--file_path', 
+        help="""
+        If type of saving is file (f) then
+        this parameter specifies path where to save the file.
+        By default it will be set to the root of the project.
+        """, 
+        default='',
+        type=str
     )
 
     # TODO: add arguments for saving preference (csv, pg db)

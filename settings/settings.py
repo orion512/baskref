@@ -24,6 +24,8 @@ class InLine:
     date: date
     namechar: str
     year: int
+    save: str
+    file_path: str
 
 
 @dataclass
