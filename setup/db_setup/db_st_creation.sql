@@ -1,5 +1,4 @@
-
-CREATE TABLE IF NOT EXISTS st_game (
+CREATE TABLE IF NOT EXISTS ST_GAME (
     "game_id" TEXT,
     "home_team" TEXT,
     "away_team" TEXT,
@@ -71,30 +70,4 @@ CREATE TABLE IF NOT EXISTS st_game (
     "away_tov_pct" TEXT,
     "away_off_rtg" TEXT,
     "away_def_rtg" TEXT
-);
-
-CREATE TABLE IF NOT EXISTS team (
-    id BIGSERIAL NOT NULL PRIMARY KEY,
-    created_timestamp TIMESTAMP NOT NULL,
-    location VARCHAR(50) NOT NULL,
-    name VARCHAR(50) NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS player (
-    id BIGSERIAL NOT NULL PRIMARY KEY,
-    created_timestamp TIMESTAMP NOT NULL,
-    first_name VARCHAR(50) NOT NULL,
-    last_name VARCHAR(50) NOT NULL,
-    date_of_birth INT,
-    height FLOAT,
-    weight INT
-);
-
-CREATE TABLE IF NOT EXISTS game (
-    id BIGSERIAL NOT NULL PRIMARY KEY,
-    created_timestamp TIMESTAMP NOT NULL,
-    first_name VARCHAR(50) NOT NULL,
-    last_name VARCHAR(50) NOT NULL,
-    height FLOAT,
-    weight INT
 );

@@ -66,3 +66,8 @@ python run.py -t g -d 2022-01-07
 - player stats
 
 ### ETL Manager
+
+## Linting
+
+check libraries to add to flake8
+https://github.com/DmytroLitvinov/awesome-flake8-extensions#naming
