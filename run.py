@@ -89,12 +89,12 @@ if __name__ == "__main__":
         "-n",
         "--namechar",
         help="""
-        If type of scraping is p (players) then 
-        this parameter specifies the first letter 
+        If type of scraping is p (players) then
+        this parameter specifies the first letter
         of the last name to scrape.
         The script will scrape all players matching the criteria.
         If the parameter is set to all, then all characters will be scraped.
-        By default the parameter is set to all. 
+        By default the parameter is set to all.
         """,
         default="all",
         type=str,

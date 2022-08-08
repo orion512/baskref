@@ -9,5 +9,5 @@ import pandas as pd
 
 
 def save_file_from_list(data: list, filepath: str) -> None:
-    """  """
+    """ """
     pd.DataFrame(data).to_csv(filepath, index=False)
