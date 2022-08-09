@@ -29,23 +29,23 @@ from src.data_collection.basketball_reference.scraper import (
 
 
 def run_data_collection_manager(settings: Settings) -> List:
-    """..."""
+    """ """
 
-    if settings.in_line.type == "g":
-        return run_daily_game_collector(settings)
-    elif settings.in_line.type == "t":
-        return run_team_collector(settings)
-    elif settings.in_line.type == "p":
-        return run_player_collector(settings)
-    elif settings.in_line.type == "gs":
-        return run_season_games_collector(settings)
-    elif settings.in_line.type == "gp":
-        return run_playoffs_game_collector(settings)
-    else:
+    collection_modes = {
+        "g": run_daily_game_collector,
+        "t": run_team_collector,
+        "p": run_player_collector,
+        "gs": run_season_games_collector,
+        "gp": run_playoffs_game_collector,
+    }
+
+    if settings.in_line.type not in collection_modes:
         raise IllegalArgumentError(
             f"{settings.in_line.type} is not a valid value for the type ",
             "(-t) argument. Choose one of the following: g, t, p, gs, gp.",
         )
+
+    return collection_modes[settings.in_line.type](settings)
 
 
 def run_daily_game_collector(settings: Settings) -> List:

@@ -14,8 +14,6 @@ from basketball reference website.
 Author: Dominik Zulovec Sajovic, May 2022
 """
 
-import urllib.parse
-
 from dataclasses import dataclass
 from requests import Response
 from requests_html import HTMLSession, Element
@@ -39,7 +37,7 @@ class BasketballReference:
     def generate_daily_games_url(cls, date: date) -> str:
         """Generates the url for all games in a given day"""
 
-        params = urllib.parse.urlencode(
+        params = parse.urlencode(
             {"month": date.month, "day": date.day, "year": date.year}
         )
 

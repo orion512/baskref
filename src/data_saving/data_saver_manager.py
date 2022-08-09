@@ -24,9 +24,9 @@ def run_data_saver_manager(settings: Settings, coll_data: list) -> None:
     file_name = f"{date_str}_{settings.in_line.type}.csv"
 
     if settings.in_line.save == "f":
-        save_file_from_list(
-            coll_data, os.path.join(settings.in_line.file_path, file_name)
-        )
+        save_path = os.path.join(settings.in_line.file_path, file_name)
+        save_file_from_list(coll_data, save_path)
+        settings.logger.info(f"Saved the file to: {save_path}")
     elif settings.in_line.type == "db":
         # save_to_db()
         pass
