@@ -12,8 +12,8 @@ Author: Dominik Zulovec Sajovic, June 2022
 
 import os
 
-from src.utils.error_utils import IllegalArgumentError
 from settings.settings import Settings
+from src.utils.error_utils import IllegalArgumentError
 from src.data_saving.file_saver.pandas_saver import save_file_from_list
 
 

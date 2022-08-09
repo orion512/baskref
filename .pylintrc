@@ -1,0 +1,8 @@
+[MAIN]
+ignore=venv
+
+[MESSAGES CONTROL]
+disable=fixme
+
+[FORMAT]
+max-line-length=79

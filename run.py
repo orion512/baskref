@@ -10,8 +10,8 @@ import argparse
 from datetime import date
 from yaml import safe_load
 from dacite import from_dict
-from src.utils.date_utils import valid_date
 from settings.settings import Settings
+from src.utils.date_utils import valid_date
 from src.data_collection.data_collection_manager import (
     run_data_collection_manager,
 )
@@ -22,8 +22,8 @@ def main(args: argparse.Namespace):
     """The main entry point into the project"""
 
     # Load the settings
-    with open(args.settings) as f:
-        sett_dict = safe_load(f)
+    with open(args.settings, encoding="utf8") as sett_file:
+        sett_dict = safe_load(sett_file)
 
     sett_dict["in_line"] = {
         "type": args.type,
@@ -142,6 +142,6 @@ if __name__ == "__main__":
 
     # TODO: add arguments for saving preference (csv, pg db)
 
-    args = parser.parse_args()
+    parameters = parser.parse_args()
 
-    main(args)
+    main(parameters)
