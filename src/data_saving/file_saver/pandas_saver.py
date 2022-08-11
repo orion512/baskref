@@ -9,5 +9,5 @@ import pandas as pd
 
 
 def save_file_from_list(data: list, filepath: str) -> None:
-    """ Saves a list of dictionaries as a CSV """
+    """Saves a list of dictionaries as a CSV"""
     pd.DataFrame(data).to_csv(filepath, index=False)

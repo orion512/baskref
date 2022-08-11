@@ -6,3 +6,8 @@ disable=fixme
 
 [FORMAT]
 max-line-length=79
+
+[BASIC]
+
+# Good variable names which should always be accepted, separated by a comma
+good-names=p,td,tr,a,

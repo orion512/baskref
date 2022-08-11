@@ -15,15 +15,15 @@ Author: Dominik Zulovec Sajovic, May 2022
 """
 
 from dataclasses import dataclass
-from requests import Response
-from requests_html import HTMLSession, Element
 from datetime import datetime, date
 from typing import Tuple, Optional, Dict, Union
 from urllib import parse
+from requests import Response
+from requests_html import HTMLSession, Element
 
 
 @dataclass
-class BasketballReference:
+class BasketballReferenceScraper:
     """Class for scraping & Parsing basketball-reference.com"""
 
     base_url: str = "https://www.basketball-reference.com"
@@ -34,26 +34,30 @@ class BasketballReference:
         return f"{cls.base_url}/leagues/NBA_{year}_games.html"
 
     @classmethod
-    def generate_daily_games_url(cls, date: date) -> str:
+    def generate_daily_games_url(cls, game_date: date) -> str:
         """Generates the url for all games in a given day"""
 
         params = parse.urlencode(
-            {"month": date.month, "day": date.day, "year": date.year}
+            {
+                "month": game_date.month,
+                "day": game_date.day,
+                "year": game_date.year,
+            }
         )
 
         return f"{cls.base_url}/boxscores/?{params}"
 
-    def scrape_game_urls_day(self, date: date) -> list:
+    def scrape_game_urls_day(self, game_date: date) -> list:
         """
         Scrapes the urls to every game's boxscore on a specific day.
-        :date: A date to scrape games on
+        :game_date: A game_date to scrape games on
         :return: a list of basketball reference urls
         """
         element_finder = "div.game_summary > p.links"
 
         game_urls = []
 
-        day_page = self._get_page(self.generate_daily_games_url(date))
+        day_page = self._get_page(self.generate_daily_games_url(game_date))
         for p in day_page.html.find(element_finder):
             anch = p.find("a", first=True)
             if anch is not None:
@@ -122,11 +126,28 @@ class BasketballReference:
 
         # game meta data
         game_time, arena_name = self._parse_game_meta_data(game_page)
+        game_id = self._parse_game_id(game_url)
         attendance = self._parse_attendance(game_page)
 
-        game_id = self._parse_game_id(game_url)
+        # basic stats
+        home_basic_dic = self._parse_basic_stats(
+            game_page, "home", home_team_sn
+        )
 
-        game_dic = {
+        away_basic_dic = self._parse_basic_stats(
+            game_page, "away", away_team_sn
+        )
+
+        # advanced stats
+        home_advanced_dic = self._parse_advanced_stats(
+            game_page, "home", home_team_sn
+        )
+
+        away_advanced_dic = self._parse_advanced_stats(
+            game_page, "away", away_team_sn
+        )
+
+        return {
             "game_id": game_id,
             "home_team": home_team_sn,
             "away_team": away_team_sn,
@@ -136,29 +157,11 @@ class BasketballReference:
             "arena_name": arena_name,
             "attendance": attendance,
             "game_url": game_url,
+            **home_basic_dic,
+            **away_basic_dic,
+            **home_advanced_dic,
+            **away_advanced_dic,
         }
-
-        home_basic_dic = self._parse_basic_stats(
-            game_page, "home", home_team_sn
-        )
-
-        away_basic_dic = self._parse_basic_stats(
-            game_page, "away", away_team_sn
-        )
-
-        game_dic = {**game_dic, **home_basic_dic, **away_basic_dic}
-
-        home_advanced_dic = self._parse_advanced_stats(
-            game_page, "home", home_team_sn
-        )
-
-        away_advanced_dic = self._parse_advanced_stats(
-            game_page, "away", away_team_sn
-        )
-
-        game_dic = {**game_dic, **home_advanced_dic, **away_advanced_dic}
-
-        return game_dic
 
     def scrape_multiple_games_data(self, game_urls: list) -> list:
         """
@@ -180,12 +183,13 @@ class BasketballReference:
 
         with HTMLSession() as session:
             page = session.get(url)
+
             if page.status_code == 200:
                 return page
-            else:
-                raise Exception(
-                    f"Couldn't scrape {url}. Status code: {page.status_code}"
-                )
+
+            raise Exception(
+                f"Couldn't scrape {url}. Status code: {page.status_code}"
+            )
 
     def _simple_parse(
         self, html: Element, finder: str, txt: bool = True
@@ -202,8 +206,8 @@ class BasketballReference:
 
         if txt:
             return ele.text
-        else:
-            return ele
+
+        return ele
 
     def _parse_team_name(self, html: Response, team: str) -> Tuple[str, str]:
         """
@@ -283,8 +287,8 @@ class BasketballReference:
 
         table_finder = f"#box-{team_sn.upper()}-game-basic"
 
-        tb = self._simple_parse(page.html, table_finder, txt=False)
-        tb_foot = self._simple_parse(tb, "tfoot", txt=False)
+        table = self._simple_parse(page.html, table_finder, txt=False)
+        tb_foot = self._simple_parse(table, "tfoot", txt=False)
 
         game_dic = {
             f"{team}_fg": int(self._simple_parse(tb_foot, "td[data-stat=fg]")),
@@ -352,8 +356,8 @@ class BasketballReference:
 
         table_finder = f"#box-{team_sn.upper()}-game-advanced"
 
-        tb = self._simple_parse(page.html, table_finder, txt=False)
-        tb_foot = self._simple_parse(tb, "tfoot", txt=False)
+        table = self._simple_parse(page.html, table_finder, txt=False)
+        tb_foot = self._simple_parse(table, "tfoot", txt=False)
 
         game_dic = {
             f"{team}_ts_pct": float(
