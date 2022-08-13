@@ -7,7 +7,7 @@ import sys
 import logging
 
 from dataclasses import dataclass
-from typing import Union
+from typing import Union, Optional
 from datetime import date
 
 
@@ -44,10 +44,10 @@ class Settings:
     environment: Environment
     in_line: InLine
     logging_level: str
-    logger: Union[None, logging.Logger]
+    logger: Optional[logging.Logger]
 
     def __post_init__(self):
-        """..."""
+        """ """
         self.logger = logging.getLogger("blogger")
         self.logger.setLevel(self.logging_level)
         handler = logging.StreamHandler(sys.stdout)

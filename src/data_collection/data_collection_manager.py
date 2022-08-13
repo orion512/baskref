@@ -19,7 +19,7 @@ type of scraping -t
 Author: Dominik Zulovec Sajovic, May 2022
 """
 
-from typing import List
+from typing import List, Callable, Dict
 
 from settings.settings import Settings
 from src.utils.error_utils import IllegalArgumentError
@@ -31,7 +31,7 @@ from src.data_collection.basketball_reference.scraper import (
 def run_data_collection_manager(settings: Settings) -> List:
     """This function runs the selected mode of collection"""
 
-    collection_modes = {
+    collection_modes: Dict[str, Callable] = {
         "g": run_daily_game_collector,
         "t": run_team_collector,
         "p": run_player_collector,

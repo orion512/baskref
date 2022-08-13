@@ -18,8 +18,7 @@ from dataclasses import dataclass
 from datetime import datetime, date
 from typing import Tuple, Optional, Dict, Union
 from urllib import parse
-from requests import Response
-from requests_html import HTMLSession, Element
+from requests_html import HTMLSession, Element, HTMLResponse
 
 
 @dataclass
@@ -175,7 +174,7 @@ class BasketballReferenceScraper:
     # Private Methods
 
     @staticmethod
-    def _get_page(url: str) -> Response:
+    def _get_page(url: str) -> HTMLResponse:
         """
         Makes a get request to the provided URL and
         return a response if status code is ok (200).
@@ -209,7 +208,7 @@ class BasketballReferenceScraper:
 
         return ele
 
-    def _parse_team_name(self, html: Response, team: str) -> Tuple[str, str]:
+    def _parse_team_name(self, html: HTMLResponse, team: str) -> Tuple[str, str]:
         """
         Provided the BR game page and the team parameter it parses out
         the team short and long names.
@@ -230,7 +229,7 @@ class BasketballReferenceScraper:
 
         return team_anchor.text, team_anchor.attrs["href"].split("/")[2]
 
-    def _parse_game_meta_data(self, html: Response) -> Tuple[datetime, str]:
+    def _parse_game_meta_data(self, html: HTMLResponse) -> Tuple[datetime, str]:
         """
         Provided the BR game page it parses out the game time and
         game arena name.
@@ -245,7 +244,7 @@ class BasketballReferenceScraper:
 
         return game_time, arena_name
 
-    def _parse_attendance(self, html: Response) -> Optional[int]:
+    def _parse_attendance(self, html: HTMLResponse) -> Optional[int]:
         """
         Provided the BR game page it parses out the game attendance.
         Sometimes the page doesn't include attendance in which case the
@@ -275,7 +274,7 @@ class BasketballReferenceScraper:
         )
 
     def _parse_basic_stats(
-        self, page: Response, team: str, team_sn: str
+        self, page: HTMLResponse, team: str, team_sn: str
     ) -> Dict[str, Union[int, float]]:
         """
         Provided the BR game page it parses out the basic stats
@@ -344,7 +343,7 @@ class BasketballReferenceScraper:
         return game_dic
 
     def _parse_advanced_stats(
-        self, page: Response, team: str, team_sn: str
+        self, page: HTMLResponse, team: str, team_sn: str
     ) -> Dict[str, Union[int, float]]:
         """
         Provided the BR game page it parses out the advanced stats

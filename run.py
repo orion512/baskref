@@ -18,7 +18,7 @@ from src.data_collection.data_collection_manager import (
 from src.data_saving.data_saver_manager import run_data_saver_manager
 
 
-def main(args: argparse.Namespace):
+def main(args: argparse.Namespace) -> None:
     """The main entry point into the project"""
 
     # Load the settings

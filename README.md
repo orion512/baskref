@@ -71,3 +71,7 @@ python run.py -t g -d 2022-01-07
 
 check libraries to add to flake8
 https://github.com/DmytroLitvinov/awesome-flake8-extensions#naming
+
+```
+mypy --ignore-missing-imports run.py 
+```
