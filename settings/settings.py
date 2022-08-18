@@ -7,7 +7,6 @@ import sys
 import logging
 
 from dataclasses import dataclass
-from typing import Union, Optional
 from datetime import date
 
 
@@ -47,7 +46,7 @@ class Settings:
     logger_name: str
 
     def __post_init__(self):
-        """ """
+        """Rns imiidiately after the initialization"""
         self.logger = logging.getLogger(self.logger_name)
         self.logger.setLevel(self.logging_level)
         handler = logging.StreamHandler(sys.stdout)

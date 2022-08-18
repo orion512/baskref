@@ -208,7 +208,9 @@ class BasketballReferenceScraper:
 
         return ele
 
-    def _parse_team_name(self, html: HTMLResponse, team: str) -> Tuple[str, str]:
+    def _parse_team_name(
+        self, html: HTMLResponse, team: str
+    ) -> Tuple[str, str]:
         """
         Provided the BR game page and the team parameter it parses out
         the team short and long names.
@@ -229,7 +231,9 @@ class BasketballReferenceScraper:
 
         return team_anchor.text, team_anchor.attrs["href"].split("/")[2]
 
-    def _parse_game_meta_data(self, html: HTMLResponse) -> Tuple[datetime, str]:
+    def _parse_game_meta_data(
+        self, html: HTMLResponse
+    ) -> Tuple[datetime, str]:
         """
         Provided the BR game page it parses out the game time and
         game arena name.
