@@ -44,11 +44,11 @@ class Settings:
     environment: Environment
     in_line: InLine
     logging_level: str
-    logger: Optional[logging.Logger]
+    logger_name: str
 
     def __post_init__(self):
         """ """
-        self.logger = logging.getLogger("blogger")
+        self.logger = logging.getLogger(self.logger_name)
         self.logger.setLevel(self.logging_level)
         handler = logging.StreamHandler(sys.stdout)
         handler.setLevel(self.logging_level)

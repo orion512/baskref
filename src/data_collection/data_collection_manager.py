@@ -31,6 +31,8 @@ from src.data_collection.basketball_reference.scraper import (
 def run_data_collection_manager(settings: Settings) -> List:
     """This function runs the selected mode of collection"""
 
+    settings.logger.info("Started the data collection manager")
+
     collection_modes: Dict[str, Callable] = {
         "g": run_daily_game_collector,
         "t": run_team_collector,

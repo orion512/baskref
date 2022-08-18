@@ -9,7 +9,7 @@ import argparse
 
 from datetime import date
 from yaml import safe_load
-from dacite import from_dict
+from dacite import from_dict, Config
 from settings.settings import Settings
 from src.utils.date_utils import valid_date
 from src.data_collection.data_collection_manager import (
