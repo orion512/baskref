@@ -19,88 +19,91 @@ type of scraping -t
 Author: Dominik Zulovec Sajovic, May 2022
 """
 
-from typing import Dict, List
+from typing import List, Callable, Dict
 
-from src.utils.error_utils import IllegalArgumentError
 from settings.settings import Settings
-from src.data_collection.basketball_reference.scraper import \
-    BasketballReference
+from src.utils.error_utils import IllegalArgumentError
+from src.data_collection.basketball_reference.scraper import (
+    BasketballReferenceScraper,
+)
 
 
-def run_data_collection_manager(settings: Settings) -> list:
-    """ ... """
+def run_data_collection_manager(settings: Settings) -> List:
+    """This function runs the selected mode of collection"""
 
-    if settings.in_line.type == 'g':
-        return run_daily_game_collector(settings)
-    elif settings.in_line.type == 't':
-        return run_team_collector(settings)
-    elif settings.in_line.type == 'p':
-        return run_player_collector(settings)
-    elif settings.in_line.type == 'gs':
-        return run_season_games_collector(settings)
-    elif settings.in_line.type == 'gp':
-        return run_playoffs_game_collector(settings)
-    else:
+    settings.logger.info("Started the data collection manager")
+
+    collection_modes: Dict[str, Callable] = {
+        "g": run_daily_game_collector,
+        "t": run_team_collector,
+        "p": run_player_collector,
+        "gs": run_season_games_collector,
+        "gp": run_playoffs_game_collector,
+    }
+
+    if settings.in_line.type not in collection_modes:
         raise IllegalArgumentError(
-            f'{settings.in_line.type} is not a valid value for the type ',
-            f'(-t) argument. Choose one of the following: g, t, p, gs, gp.'
-            )
-    
+            f"{settings.in_line.type} is not a valid value for the type ",
+            "(-t) argument. Choose one of the following: g, t, p, gs, gp.",
+        )
 
-def run_daily_game_collector(settings: Settings) -> list:
+    return collection_modes[settings.in_line.type](settings)
+
+
+def run_daily_game_collector(settings: Settings) -> List:
     """
     This function orchestrates the collection of NBA games on
     a specific day.
     """
 
-    settings.logger.info(f'DAILY GAME COLLECTOR MODE')
-    settings.logger.info(f'Collecting all games for: {settings.in_line.date}')
-    br = BasketballReference()
+    settings.logger.info("DAILY GAME COLLECTOR MODE")
+    settings.logger.info(f"Collecting all games for: {settings.in_line.date}")
+    br_scraper = BasketballReferenceScraper()
 
     # 1. Get all the game urls for the specific day
-    game_urls = br.scrape_game_urls_day(settings.in_line.date)
-    settings.logger.info(f'Scraped {len(game_urls)} game urls')
+    game_urls = br_scraper.scrape_game_urls_day(settings.in_line.date)
+    settings.logger.info(f"Scraped {len(game_urls)} game urls")
 
     # 2. Get the game data for the list of games
-    game_data = br.scrape_multiple_games_data(game_urls)
-    settings.logger.info(f'Scraped {len(game_data)} games')
+    game_data = br_scraper.scrape_multiple_games_data(game_urls)
+    settings.logger.info(f"Scraped {len(game_data)} games")
 
     return game_data
 
 
 def run_team_collector():
-    pass
+    """This function orchestrates the collection of all NBA teams"""
 
 
 def run_player_collector():
-    pass
+    """This function orchestrates the collection of all NBA players"""
 
 
-def run_season_games_collector(settings: Settings) -> list:
-    """ Orchestrates the collection of all games in a season """
+def run_season_games_collector(settings: Settings) -> List:
+    """Orchestrates the collection of all games in a season"""
 
-    settings.logger.info(f'SEASON GAME COLLECTOR MODE')
-    settings.logger.info(f'Collecting all games for: {settings.in_line.year}')
-    br = BasketballReference()
+    settings.logger.info("SEASON GAME COLLECTOR MODE")
+    settings.logger.info(f"Collecting all games for: {settings.in_line.year}")
+    br_scraper = BasketballReferenceScraper()
 
     # 1. Get all the months in a specific season
-    month_urls = br.scrape_all_months_urls(settings.in_line.year)
-    settings.logger.info(f'Scraped {len(month_urls)} month urls')
+    month_urls = br_scraper.scrape_all_months_urls(settings.in_line.year)
+    settings.logger.info(f"Scraped {len(month_urls)} month urls")
 
     # 2. Get all the game urls for all months in a season
-    game_urls = br.scrape_multiple_game_urls_month(month_urls)
-    settings.logger.info(f'Scraped {len(game_urls)} game urls')
-    
+    game_urls = br_scraper.scrape_multiple_game_urls_month(month_urls)
+    settings.logger.info(f"Scraped {len(game_urls)} game urls")
+
     # 3. Get the game data for the list of games
-    game_data = br.scrape_multiple_games_data(game_urls)
-    settings.logger.info(f'Scraped {len(game_data)} games')
+    game_data = br_scraper.scrape_multiple_games_data(game_urls)
+    settings.logger.info(f"Scraped {len(game_data)} games")
 
     return game_data
 
 
 def run_playoffs_game_collector():
-    pass
+    """Orchestrates the collection of all games in a playoff"""
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

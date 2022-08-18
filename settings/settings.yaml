@@ -6,3 +6,5 @@ logging_level: 'DEBUG'
 
 saver:
   file_bucket: 'datasets'
+
+logger_name: 'blogger'

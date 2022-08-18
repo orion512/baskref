@@ -6,4 +6,4 @@ Author: Dominik Zulovec Sajovic, June 2022
 
 
 class IllegalArgumentError(ValueError):
-    pass
+    """Definition for a new type of error when a wrong argument is passed"""

@@ -42,7 +42,7 @@ deactivate
 
 Scrape all games for the 7th of January 2022.
 ```
-python run.py -t g -d 2022-01-07
+python run.py -t g -d 2022-01-07 -fp datasets
 ```
 
 
@@ -66,3 +66,12 @@ python run.py -t g -d 2022-01-07
 - player stats
 
 ### ETL Manager
+
+## Linting
+
+check libraries to add to flake8
+https://github.com/DmytroLitvinov/awesome-flake8-extensions#naming
+
+```
+mypy --ignore-missing-imports .
+```
