@@ -9,14 +9,19 @@ data into a postgreSQL database directly.
 
 ## How to Setup?
 
-### Install PostgreSQL DB (optional)
-Install PostgreSQL for your operating system.
-https://www.postgresql.org/download/
+### Environment
 
-If you don't want to install a postgreSQL DB you can also choose to
-save the data to flat files (CSV).
+Make sure th environment has the pip package manager.
+https://pip.pypa.io/en/stable/installation/
 
-### Virtual Environment
+Install requirements
+```bash
+pip install -r requirements.txt
+```
+
+**Virtual Environment (optional)**
+You might want to use a virtual environment for executing the project.
+
 Create a new virtual environemnt
 ```
 python -m venv venv  # The second parameter is a path to the virtual env.
@@ -38,24 +43,12 @@ deactivate
 
 ## How to Run?
 
+
+
 Scrape all games for the 7th of January 2022.
 ```
 python run.py -t g -d 2022-01-07 -fp datasets
 ```
-
-
-## How to Run Tests?
-
-## Project Structure
-
-### DB Setup
-- Tables:
-    - team
-    - player
-    - game
-    - player_game_stats
-
-### Data Collection Layer
 
 #### What data are we collecting?
 - teams
@@ -63,7 +56,9 @@ python run.py -t g -d 2022-01-07 -fp datasets
 - game logs
 - player stats
 
-### ETL Manager
+
+## How to Run Tests?
+
 
 ## Code Formating
 

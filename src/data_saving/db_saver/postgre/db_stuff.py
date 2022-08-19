@@ -16,7 +16,7 @@ Author: _________________, <month> <year>
 #     conn = psycopg2.connect(
 #         dbname="nba",
 #         user="postgres",
-#         password="password",
+#         password="________",
 #         host="localhost",
 #     )
 

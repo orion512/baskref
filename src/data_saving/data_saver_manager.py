@@ -3,7 +3,7 @@ This is the manager script which orchestrates the data saving.
 
 Depending on the passed argument the data can get saved in:
 - CSV (main functionality)
-- PostgreSQL (optional later feature)
+- PostgreSQL (optional future feature)
 
 Author: Dominik Zulovec Sajovic, June 2022
 """
