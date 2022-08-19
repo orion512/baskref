@@ -9,7 +9,7 @@ import argparse
 
 from datetime import date
 from yaml import safe_load
-from dacite import from_dict, Config
+from dacite import from_dict
 from settings.settings import Settings
 from src.utils.date_utils import valid_date
 from src.data_collection.data_collection_manager import (
@@ -19,7 +19,7 @@ from src.data_saving.data_saver_manager import run_data_saver_manager
 
 
 def main(args: argparse.Namespace) -> None:
-    """The main entry point into the project"""
+    """The main entry point into the project."""
 
     # Load the settings
     with open(args.settings, encoding="utf8") as sett_file:
