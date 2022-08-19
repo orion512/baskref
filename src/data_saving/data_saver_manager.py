@@ -2,9 +2,8 @@
 This is the manager script which orchestrates the data saving.
 
 Depending on the passed argument the data can get saved in:
-- CSV
-- PostgreSQL
-- SQLite
+- CSV (main functionality)
+- PostgreSQL (optional later feature)
 
 Author: Dominik Zulovec Sajovic, June 2022
 """
