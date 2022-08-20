@@ -1,3 +1,12 @@
+"""
+This package contains the classes and functions which
+are used to save the data to the PostgreSQL database.
+
+THIS IS NOT IMPLEMENTED YET.
+
+Author: _________________, <month> <year>
+"""
+
 # import psycopg2
 # import psycopg2.extras
 
@@ -7,7 +16,7 @@
 #     conn = psycopg2.connect(
 #         dbname="nba",
 #         user="postgres",
-#         password="password",
+#         password="________",
 #         host="localhost",
 #     )
 
