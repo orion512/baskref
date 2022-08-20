@@ -94,3 +94,7 @@ the configuration for mypy is stored in pyproject.toml file.
 # run mypy over the entire code base
 mypy .
 ```
+
+### Contributors
+
+1. Dominik Zulovec Sajovic
