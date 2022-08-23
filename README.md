@@ -59,6 +59,27 @@ python run.py -t g -d 2022-01-07 -fp datasets
 
 ## How to Run Tests?
 
+* Run all tests with Pytest
+```
+pytest
+```
+
+* Run just the unit tests
+```
+pytest -v -m unittest
+```
+
+* Run just the integration tests
+```
+pytest -v -m integrationtest
+```
+
+* Run coverage
+```
+coverage run -m pytest
+coverage report --omit="*/test*" -m --skip-empty
+```
+
 
 ## Code Formating
 

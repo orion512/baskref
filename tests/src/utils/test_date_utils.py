@@ -18,11 +18,11 @@ class TestDateUtils:
     """Class for date utils tests."""
 
     test_dates_raise = [
-        ("202207-08", pytest.raises(ArgumentTypeError)),
-        ("2022-13-08", pytest.raises(ArgumentTypeError)),
-        ("2000/07/08", pytest.raises(ArgumentTypeError)),
-        ("2022-09-31", pytest.raises(ArgumentTypeError)),
-        ("20220708", pytest.raises(ArgumentTypeError)),
+        ("202207-08", None, pytest.raises(ArgumentTypeError)),
+        ("2022-13-08", None, pytest.raises(ArgumentTypeError)),
+        ("2000/07/08", None, pytest.raises(ArgumentTypeError)),
+        ("2022-09-31", None, pytest.raises(ArgumentTypeError)),
+        ("20220708", None, pytest.raises(ArgumentTypeError)),
     ]
 
     test_dates_correct = [
@@ -32,12 +32,15 @@ class TestDateUtils:
     ]
 
     @pytest.mark.unittest
-    @pytest.mark.parametrize("str_date, expected_status", test_dates_raise)
-    def test_valid_date_raise(self, str_date, _):
+    @pytest.mark.parametrize(
+        "str_date, expected_status, raise_err", test_dates_raise
+    )
+    def test_valid_date_raise(self, str_date, expected_status, raise_err):
         """Tests the function valid_date."""
 
-        with pytest.raises(ArgumentTypeError):
-            _ = valid_date(str_date)
+        with pytest.raises(raise_err.expected_exception):
+            returned_status = valid_date(str_date)
+            assert expected_status == returned_status
 
     @pytest.mark.unittest
     @pytest.mark.parametrize("str_date, expected_status", test_dates_correct)

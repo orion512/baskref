@@ -13,9 +13,4 @@ def valid_date(str_date: str) -> date:
     try:
         return datetime.strptime(str_date, "%Y-%m-%d").date()
     except ValueError as exc:
-        # raise ArgumentTypeError(f"not a valid date: {str_date!r}") from exc
-        raise ArgumentTypeError from exc
-
-
-if __name__ == "__main__":
-    pass
+        raise ArgumentTypeError(f"not a valid date: {str_date!r}") from exc
