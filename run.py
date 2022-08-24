@@ -12,10 +12,10 @@ from yaml import safe_load
 from dacite import from_dict
 from settings.settings import Settings
 from src.utils.date_utils import valid_date
-from src.data_collection.data_collection_manager import (
+from src.basketball_scraper import (
     run_data_collection_manager,
+    run_data_saving_manager,
 )
-from src.data_saving.data_saver_manager import run_data_saver_manager
 
 
 def main(args: argparse.Namespace) -> None:
@@ -41,7 +41,7 @@ def main(args: argparse.Namespace) -> None:
     collected = run_data_collection_manager(settings)
 
     # # 2. Run the data saver
-    run_data_saver_manager(settings, collected)
+    run_data_saving_manager(settings, collected)
 
 
 if __name__ == "__main__":

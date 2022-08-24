@@ -16,7 +16,7 @@ from src.utils.error_utils import IllegalArgumentError
 from src.data_saving.file_saver.pandas_saver import save_file_from_list
 
 
-def run_data_saver_manager(settings: Settings, coll_data: list) -> None:
+def run_data_saving_manager(settings: Settings, coll_data: list) -> None:
     """..."""
 
     date_str = settings.in_line.date.strftime("%Y%m%d")

@@ -4,14 +4,10 @@ Holds the tests for the date utils functions.
 Author: Dominik Zulovec Sajovic - August 2022
 """
 
-import os
 from datetime import datetime
 from argparse import ArgumentTypeError
 import pytest
 from src.utils.date_utils import valid_date
-
-
-root_path = os.path.abspath(os.path.join(__file__, os.pardir, os.pardir))
 
 
 class TestDateUtils:
@@ -23,6 +19,8 @@ class TestDateUtils:
         ("2000/07/08", None, pytest.raises(ArgumentTypeError)),
         ("2022-09-31", None, pytest.raises(ArgumentTypeError)),
         ("20220708", None, pytest.raises(ArgumentTypeError)),
+        (None, None, pytest.raises(ArgumentTypeError)),
+        (3, None, pytest.raises(ArgumentTypeError)),
     ]
 
     test_dates_correct = [

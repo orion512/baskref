@@ -76,7 +76,7 @@ pytest -v -m integrationtest
 
 * Run coverage
 ```
-coverage run -m pytest
+coverage run --source=src -m pytest
 coverage report --omit="*/test*" -m --skip-empty
 ```
 
