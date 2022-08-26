@@ -12,10 +12,10 @@ def save_file_from_list(data: list[dict], filepath: str) -> None:
     """Saves a list of dictionaries as a CSV"""
 
     # check that we have a list of dictionaries
-    if ~isinstance(data, list):
+    if not isinstance(data, list):
         raise ValueError("The parameter data has to be a list")
 
-    if ~check_all_elements_dicts(data):
+    if not check_all_elements_dicts(data):
         raise ValueError(
             "All the elements of the parameter data have to be dictionaires"
         )
@@ -31,10 +31,7 @@ def save_file_from_list(data: list[dict], filepath: str) -> None:
 def check_all_elements_dicts(list_param: list) -> bool:
     """inspects if all elements of the list are dictionaries"""
 
-    print(list_param, type(list_param))
-
     if not isinstance(list_param, list):
-        print("Im raising")
         raise ValueError("The parameter list_param has to be a list")
 
     non_dicts = [ele for ele in list_param if not isinstance(ele, dict)]
