@@ -105,6 +105,49 @@ class TestPandasSaver:
 
         assert read_data.equals(dummy_data)
 
+    test_saving_to_list_folder_exists = [
+        (
+            [{"A": 2, "B": "0022"}, {"A": 1, "B": "0011"}],
+            os.path.join("tests", "temp", "temp.csv"),
+        ),
+        (
+            [{"A": 2}, {"A": 1}],
+            os.path.join("tests", "temp", "temp.csv"),
+        ),
+        (
+            [{"009": "2022-08-09"}, {"009": "2022-28-12"}],
+            os.path.join("tests", "temp", "temp.csv"),
+        ),
+    ]
+
+    @pytest.mark.unittest
+    @pytest.mark.parametrize(
+        "input_list, file_path", test_saving_to_list_folder_exists
+    )
+    def test_save_file_from_list_folder_exists(self, input_list, file_path):
+        """Tests the function save_file_from_list."""
+
+        testing_dir = os.path.dirname(file_path)
+        file_name = os.path.basename(file_path)
+
+        input_file_path = os.path.join(root_path, testing_dir)
+        input_file_full_path = os.path.join(input_file_path, file_name)
+
+        # create the folder before running the function
+        os.makedirs(input_file_path)
+
+        try:
+            save_file_from_list(input_list, input_file_full_path)
+
+            read_data = pd.read_csv(input_file_full_path, dtype=str)
+            dummy_data = pd.DataFrame(input_list).astype(str)
+        finally:
+            # Clean the results created by the function
+            os.remove(input_file_full_path)
+            os.rmdir(input_file_path)
+
+        assert read_data.equals(dummy_data)
+
     test_saving_to_list_raise = [
         (
             {"A": 2, "B": "0022"},

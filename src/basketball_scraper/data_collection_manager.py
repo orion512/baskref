@@ -23,8 +23,9 @@ from typing import List, Callable, Dict
 
 from settings.settings import Settings
 from src.utils.error_utils import IllegalArgumentError
-from src.data_collection.basketball_reference.scraper import (
-    BasketballReferenceScraper,
+from src.data_collection.scraper import (
+    BasketRefUrlScraper,
+    BasketRefDataScraper,
 )
 
 
@@ -58,14 +59,15 @@ def run_daily_game_collector(settings: Settings) -> List:
 
     settings.logger.info("DAILY GAME COLLECTOR MODE")
     settings.logger.info(f"Collecting all games for: {settings.in_line.date}")
-    br_scraper = BasketballReferenceScraper()
 
     # 1. Get all the game urls for the specific day
-    game_urls = br_scraper.scrape_game_urls_day(settings.in_line.date)
+    url_scraper = BasketRefUrlScraper()
+    game_urls = url_scraper.get_game_urls_day(settings.in_line.date)
     settings.logger.info(f"Scraped {len(game_urls)} game urls")
 
     # 2. Get the game data for the list of games
-    game_data = br_scraper.scrape_multiple_games_data(game_urls)
+    data_scraper = BasketRefDataScraper()
+    game_data = data_scraper.get_games_data(game_urls)
     settings.logger.info(f"Scraped {len(game_data)} games")
 
     return game_data
@@ -82,23 +84,27 @@ def run_player_collector():
 def run_season_games_collector(settings: Settings) -> List:
     """Orchestrates the collection of all games in a season"""
 
-    settings.logger.info("SEASON GAME COLLECTOR MODE")
-    settings.logger.info(f"Collecting all games for: {settings.in_line.year}")
-    br_scraper = BasketballReferenceScraper()
+    print(settings)
+    return []
 
-    # 1. Get all the months in a specific season
-    month_urls = br_scraper.scrape_all_months_urls(settings.in_line.year)
-    settings.logger.info(f"Scraped {len(month_urls)} month urls")
+    # settings.logger.info("SEASON GAME COLLECTOR MODE")
 
-    # 2. Get all the game urls for all months in a season
-    game_urls = br_scraper.scrape_multiple_game_urls_month(month_urls)
-    settings.logger.info(f"Scraped {len(game_urls)} game urls")
 
-    # 3. Get the game data for the list of games
-    game_data = br_scraper.scrape_multiple_games_data(game_urls)
-    settings.logger.info(f"Scraped {len(game_data)} games")
+# settings.logger.info(f"Collecting all games for: {settings.in_line.year}")
 
-    return game_data
+# # 1. Get all the game urls for all months in a season
+# url_scraper = BasketRefUrlScraper()
+# game_urls = url_scraper.scrape_multiple_game_urls_month(
+#     settings.in_line.year
+# )
+# settings.logger.info(f"Scraped {len(game_urls)} game urls")
+
+# # 3. Get the game data for the list of games
+# data_scraper = BasketRefDataScraper()
+# game_data = data_scraper.scrape_multiple_games_data(game_urls)
+# settings.logger.info(f"Scraped {len(game_data)} games")
+
+# return game_data
 
 
 def run_playoffs_game_collector():

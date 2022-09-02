@@ -22,7 +22,7 @@ def save_file_from_list(data: list[dict], filepath: str) -> None:
 
     # if path to file doesn't exist -> create it
     folder_path = os.path.dirname(filepath)
-    if ~os.path.exists(folder_path):
+    if not os.path.exists(folder_path):
         os.makedirs(folder_path)
 
     pd.DataFrame(data).to_csv(filepath, index=False)
