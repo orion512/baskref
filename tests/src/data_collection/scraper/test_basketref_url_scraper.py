@@ -6,7 +6,7 @@ Author: Dominik Zulovec Sajovic - August 2022
 
 from datetime import date
 import pytest
-from src.data_collection.scraper.basketref_url_scraper import (
+from src.data_collection.scraper import (
     BasketRefUrlScraper,
 )
 

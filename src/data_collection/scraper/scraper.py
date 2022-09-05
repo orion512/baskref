@@ -79,6 +79,12 @@ class Scraper:
         It is deemed successful if the code is 2xx.
         """
 
+        if code is None:
+            return False
+
+        if not isinstance(code, int):
+            raise ValueError("The status code has to be an integer!")
+
         return 200 <= code < 300
 
 
