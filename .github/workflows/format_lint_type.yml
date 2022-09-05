@@ -23,7 +23,7 @@ jobs:
         black $(git ls-files '*.py')
     - name: Analysing the code with pylint
       run: |
-        pylint $(git ls-files '*.py')
+        pylint src
     - name: run mypy checks
       run: |
         mypy $(git ls-files '*.py')
