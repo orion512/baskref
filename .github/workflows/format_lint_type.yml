@@ -27,3 +27,6 @@ jobs:
     - name: run mypy checks
       run: |
         mypy $(git ls-files '*.py')
+    - name: test with pytest
+      run: |
+        pytest tests

@@ -2,7 +2,7 @@
 ignore=venv
 
 [MESSAGES CONTROL]
-disable=fixme
+disable=fixme,too-few-public-methods
 
 [FORMAT]
 max-line-length=79
