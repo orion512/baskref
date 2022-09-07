@@ -19,11 +19,11 @@ from datetime import datetime
 from typing import Tuple, Optional, Dict, Union
 from urllib import parse
 from requests_html import HTMLResponse
-import src.data_collection.scraper.scraper as scr
+import src.data_collection.scraper.html_scraper as scr
 
 
 @dataclass
-class BasketRefDataScraper(scr.Scraper):
+class BasketRefDataScraper(scr.HTMLScraper):
     """Class for scraping & Parsing basketball-reference.com data"""
 
     # public functions

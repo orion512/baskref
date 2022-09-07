@@ -9,11 +9,11 @@ from dataclasses import dataclass
 from datetime import date
 from urllib import parse
 from requests_html import HTMLResponse
-import src.data_collection.scraper.scraper as scr
+import src.data_collection.scraper.html_scraper as scr
 
 
 @dataclass
-class BasketRefUrlScraper(scr.Scraper):
+class BasketRefUrlScraper(scr.HTMLScraper):
     """
     Class used for generating the URLs for scraping BasketballRefernce.
     Besides simple generation it also includes scraping and parsing needed
@@ -35,21 +35,24 @@ class BasketRefUrlScraper(scr.Scraper):
             self._generate_daily_games_url(game_date)
         )
 
-    # this should be for whole year
-    # def get_multiple_game_urls_month(
-    #     self, game_list_urls: list
-    # ) -> list:
-    #     """
-    #     Scrapes multiple pages for urls to every game (boxscore).
-    #     :game_list_urls: list of URLs containing list of games
-    #     :return: returns a list of game urls from Basketball Reference
-    #     """
+    def get_game_urls_year(self, year: int) -> list:
+        """
+        Scrapes the urls to every game's boxscore on a specific day.
+        :game_date: A game_date to scrape games on
+        :return: a list of basketball reference urls
+        """
 
-    #     return [
-    #         gurl
-    #         for url in game_list_urls
-    #         for gurl in self.generate_scrape_game_urls_month(url)
-    #     ]
+        # scrape yearly url for monthly urls
+        monthly_urls = self._scrape_month_urls(
+            self._generate_season_games_url(year)
+        )
+
+        # scrape monthly urls for game data
+        return [
+            gurl
+            for murl in monthly_urls
+            for gurl in self._scrape_game_urls_month(murl)
+        ]
 
     # private functions
 
@@ -64,11 +67,30 @@ class BasketRefUrlScraper(scr.Scraper):
 
         return self.scrape(daily_games_url, self._parse_daily_games)
 
+    def _scrape_month_urls(self, yearly_games_url: str) -> list:
+        """
+        Scrapes the urls to every month with games in a single year (season)
+        :yearly_games_url: Url to list of months in a season
+        :return: a list of basketball reference urls
+        """
+
+        return self.scrape(yearly_games_url, self._parse_months_in_year)
+
+    def _scrape_game_urls_month(self, month_games_url: str) -> list:
+        """
+        Scrapes the urls to every game's boxscore in a specific month
+        in a year.
+        :month_games_url: Url to the games in that month
+        :return: a list of basketball reference urls
+        """
+
+        return self.scrape(month_games_url, self._parse_monthly_games)
+
     ## parsing functions
 
     def _parse_daily_games(self, daily_games_page: HTMLResponse) -> list:
         """
-        Scrapes the urls to every game's boxscore on a specific day.
+        Parses the games out of the html containing daily games.
         :game_date: A game_date to scrape games on
         :return: a list of basketball reference urls
         """
@@ -84,62 +106,40 @@ class BasketRefUrlScraper(scr.Scraper):
 
         return game_urls
 
-    # def generate_scrape_all_months_urls(self, year: int) -> list:
-    #     """
-    #     Scrapes the urls to every month of a given NBA season
-    #     :year: A year representing the year in which the NBA season ends
-    #     :return: returns a list of month urls from Basketball Reference
-    #     """
+    def _parse_months_in_year(self, yearly_page: HTMLResponse) -> list:
+        """
+        Parses the month urls out of the html containing monthly urls.
+        :game_date: A game_date to scrape games on
+        :return: a list of basketball reference urls
+        """
 
-    #     # get
-    #     main_page = self.get_page(self.generate_season_games_url(year))
+        return [
+            self.base_url + a.attrs["href"]
+            for a in yearly_page.html.find("div.filter > div > a")
+        ]
 
-    #     # parse
-    #     return [
-    #         self.base_url + a.attrs["href"]
-    #         for a in main_page.html.find("div.filter > div > a")
-    #     ]
+    def _parse_monthly_games(self, monthly_games_page: HTMLResponse) -> list:
+        """
+        Parses the games out of the html containing monthly games.
+        :game_date: A game_date to scrape games on
+        :return: a list of basketball reference urls
+        """
 
-    # def generate_scrape_game_urls_month(self, month_page: str) -> list:
-    #     """
-    #     Scrapes the urls to every game (boxscore) from the month webpage.
-    #     :page: web page - /leagues/NBA_YEAR_games-MONTH.html
-    #     :return: returns a list of game urls from Basketball Reference
-    #     """
+        element_finder = 'td[data-stat="box_score_text"]'
+        game_urls = []
 
-    #     # get
-    #     month_page = self.get_page(month_page)
+        for td in monthly_games_page.html.find(element_finder):
+            anch = td.find("a", first=True)
+            if anch is not None:
+                url = anch.find("a", first=True).attrs["href"]
+                game_urls.append(self.base_url + url)
 
-    #     # parse
-    #     element_finder = 'td[data-stat="box_score_text"]'
-    #     game_urls = []
-
-    #     for td in month_page.html.find(element_finder):
-    #         anch = td.find("a", first=True)
-    #         if anch is not None:
-    #             url = anch.find("a", first=True).attrs["href"]
-    #             game_urls.append(self.base_url + url)
-
-    #     return game_urls
-
-    # def generate_scrape_multiple_game_urls_month(
-    #     self, game_list_urls: list
-    # ) -> list:
-    #     """
-    #     Scrapes multiple pages for urls to every game (boxscore).
-    #     :game_list_urls: list of URLs containing list of games
-    #     :return: returns a list of game urls from Basketball Reference
-    #     """
-
-    #     return [
-    #         gurl
-    #         for url in game_list_urls
-    #         for gurl in self.generate_scrape_game_urls_month(url)
-    #     ]
+        return game_urls
 
     # # helper functions
 
     def _generate_season_games_url(self, year: int) -> str:
+
         """Generates the url for all games in a year"""
 
         if not isinstance(year, int):

@@ -84,10 +84,20 @@ def run_player_collector():
 def run_season_games_collector(settings: Settings) -> List:
     """Orchestrates the collection of all games in a season"""
 
-    print(settings)
-    return []
+    settings.logger.info("SEASON GAME COLLECTOR MODE")
+    settings.logger.info(f"Collecting all games for: {settings.in_line.year}")
 
-    # settings.logger.info("SEASON GAME COLLECTOR MODE")
+    # 1. Get all the game urls for the specific year
+    url_scraper = BasketRefUrlScraper()
+    game_urls = url_scraper.get_game_urls_year(settings.in_line.year)
+    settings.logger.info(f"Scraped {len(game_urls)} game urls")
+
+    # 2. Get the game data for the list of games
+    data_scraper = BasketRefDataScraper()
+    game_data = data_scraper.get_games_data(game_urls)
+    settings.logger.info(f"Scraped {len(game_data)} games")
+
+    return game_data
 
 
 # settings.logger.info(f"Collecting all games for: {settings.in_line.year}")

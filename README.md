@@ -50,6 +50,11 @@ Scrape all games for the 7th of January 2022.
 python run.py -t g -d 2022-01-07 -fp datasets
 ```
 
+Scrape all games for the 2006 NBA season (regular season + playoffs).
+```
+python run.py -t gs -y 2006 -fp datasets
+```
+
 #### What data are we collecting?
 - teams
 - players

@@ -8,8 +8,8 @@ Author: Dominik Zulovec Sajovic - September 2022
 from unittest.mock import patch
 import pytest
 from requests_html import HTMLResponse, HTMLSession
-from src.data_collection.scraper.scraper import (
-    Scraper,
+from src.data_collection.scraper.html_scraper import (
+    HTMLScraper,
     ScrapingError,
     ScrapingConnError,
 )
@@ -45,7 +45,7 @@ class TestScraper:
 
         req_mock.return_value = self._generate_response(website_html, code)
 
-        scp = Scraper()
+        scp = HTMLScraper()
 
         page = scp.get_page(input_url)
 
@@ -69,7 +69,7 @@ class TestScraper:
 
         req_mock.return_value = self._generate_response("<div>ok</div>", code)
 
-        scp = Scraper()
+        scp = HTMLScraper()
 
         with pytest.raises(raise_err.expected_exception):
             returned_status = scp.get_page("https://fake.url")
@@ -94,7 +94,7 @@ class TestScraper:
     def test_is_success_code(self, input_code, expected_status):
         """Tests the function scrape_game_urls_day."""
 
-        scp = Scraper()
+        scp = HTMLScraper()
 
         returned_status = scp._is_success_code(input_code)
         assert expected_status == returned_status
