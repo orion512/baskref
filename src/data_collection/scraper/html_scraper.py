@@ -12,7 +12,7 @@ from requests_html import HTMLSession, HTMLResponse, Element
 
 
 @dataclass
-class Scraper:
+class HTMLScraper:
     """Class for scraping the web"""
 
     def scrape(self, url: str, parser_fun: Callable) -> Any:
