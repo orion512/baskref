@@ -1,15 +1,6 @@
 """
-This page contains the class which is used to scrape data
-from basketball reference website.
-
-- Scrape all teams https://www.basketball-reference.com/teams/
-- Scrape all players https://www.basketball-reference.com/players/
-- Scrape all games in a year
-    - https://www.basketball-reference.com/leagues/NBA_2022_games-april.html
-    - scrape all months
-    - scrape all games including link to box scores
-- Scrape all playoff games in a year
-    - https://www.basketball-reference.com/playoffs/NBA_2022_games.html
+This page contains the class which is used to scrape basketball data
+from basketball reference websites.
 
 Author: Dominik Zulovec Sajovic, May 2022
 """

@@ -1,5 +1,14 @@
 """
-This page contains the basketball reference generator class.
+This page contains the basketball reference class for scraping urls.
+
+- Scrape all teams https://www.basketball-reference.com/teams/
+- Scrape all players https://www.basketball-reference.com/players/
+- Scrape all games in a year
+    - https://www.basketball-reference.com/leagues/NBA_2022_games-april.html
+    - scrape all months
+    - scrape all games including link to box scores
+- Scrape all playoff games in a year
+    - https://www.basketball-reference.com/playoffs/NBA_2022_games.html
 
 Author: Dominik Zulovec Sajovic, September 2022
 """
@@ -38,7 +47,7 @@ class BasketRefUrlScraper(scr.HTMLScraper):
     def get_game_urls_year(self, year: int) -> list:
         """
         Scrapes the urls to every game's boxscore on a specific day.
-        :game_date: A game_date to scrape games on
+        :year: A year of the season
         :return: a list of basketball reference urls
         """
 
@@ -53,6 +62,17 @@ class BasketRefUrlScraper(scr.HTMLScraper):
             for murl in monthly_urls
             for gurl in self._scrape_game_urls_month(murl)
         ]
+
+    def get_game_urls_playoffs(self, year: int) -> list:
+        """
+        Scrapes the urls to every game's boxscore in a specific postseason.
+        :year: A year of the postseason
+        :return: a list of basketball reference urls
+        """
+
+        return self._scrape_game_urls_playoffs(
+            self._generate_playoff_games_url(year)
+        )
 
     # private functions
 
@@ -85,6 +105,16 @@ class BasketRefUrlScraper(scr.HTMLScraper):
         """
 
         return self.scrape(month_games_url, self._parse_monthly_games)
+
+    def _scrape_game_urls_playoffs(self, playoff_games_url: str) -> list:
+        """
+        Scrapes the urls to every game's boxscore in a specific postseason.
+        The parsing function used is the same as the one for months.
+        :playoff_games_url: Url to the games in that postseason
+        :return: a list of basketball reference urls
+        """
+
+        return self.scrape(playoff_games_url, self._parse_monthly_games)
 
     ## parsing functions
 
@@ -149,6 +179,18 @@ class BasketRefUrlScraper(scr.HTMLScraper):
             raise ValueError("Year cannot be less than 1947!")
 
         return f"{self.base_url}/leagues/NBA_{year}_games.html"
+
+    def _generate_playoff_games_url(self, year: int) -> str:
+
+        """Generates the url for all games in a single postseason"""
+
+        if not isinstance(year, int):
+            raise ValueError("Year must be a valid integer")
+
+        if year < 1947:
+            raise ValueError("Year cannot be less than 1947!")
+
+        return f"{self.base_url}/playoffs/NBA_{year}_games.html"
 
     def _generate_daily_games_url(self, game_date: date) -> str:
         """Generates the url for all games in a given day"""
