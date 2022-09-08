@@ -10,6 +10,7 @@ Author: Dominik Zulovec Sajovic, June 2022
 
 
 import os
+from typing import Dict
 
 from settings.settings import Settings
 from src.utils.error_utils import IllegalArgumentError
@@ -19,8 +20,16 @@ from src.data_saving.file_saver.pandas_saver import save_file_from_list
 def run_data_saving_manager(settings: Settings, coll_data: list) -> None:
     """..."""
 
-    date_str = settings.in_line.date.strftime("%Y%m%d")
-    file_name = f"{date_str}_{settings.in_line.type}.csv"
+    saving_prefix_options: Dict[str, str] = {
+        "g": settings.in_line.date.strftime("%Y%m%d"),
+        "t": "teams",
+        "p": settings.in_line.namechar,
+        "gs": str(settings.in_line.year),
+        "gp": str(settings.in_line.year),
+    }
+
+    chosen_prefix = saving_prefix_options[settings.in_line.type]
+    file_name = f"{chosen_prefix}_{settings.in_line.type}.csv"
 
     if settings.in_line.save == "f":
         save_path = os.path.join(settings.in_line.file_path, file_name)

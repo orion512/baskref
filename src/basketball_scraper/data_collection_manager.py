@@ -75,10 +75,12 @@ def run_daily_game_collector(settings: Settings) -> List:
 
 def run_team_collector():
     """This function orchestrates the collection of all NBA teams"""
+    raise NotImplementedError
 
 
 def run_player_collector():
     """This function orchestrates the collection of all NBA players"""
+    raise NotImplementedError
 
 
 def run_season_games_collector(settings: Settings) -> List:
@@ -100,25 +102,25 @@ def run_season_games_collector(settings: Settings) -> List:
     return game_data
 
 
-# settings.logger.info(f"Collecting all games for: {settings.in_line.year}")
-
-# # 1. Get all the game urls for all months in a season
-# url_scraper = BasketRefUrlScraper()
-# game_urls = url_scraper.scrape_multiple_game_urls_month(
-#     settings.in_line.year
-# )
-# settings.logger.info(f"Scraped {len(game_urls)} game urls")
-
-# # 3. Get the game data for the list of games
-# data_scraper = BasketRefDataScraper()
-# game_data = data_scraper.scrape_multiple_games_data(game_urls)
-# settings.logger.info(f"Scraped {len(game_data)} games")
-
-# return game_data
-
-
-def run_playoffs_game_collector():
+def run_playoffs_game_collector(settings: Settings) -> List:
     """Orchestrates the collection of all games in a playoff"""
+
+    settings.logger.info("PLAYOFF GAME COLLECTOR MODE")
+    settings.logger.info(
+        f"Collecting all games for: {settings.in_line.year} playoffs"
+    )
+
+    # 1. Get all the game urls for the specific postseason
+    url_scraper = BasketRefUrlScraper()
+    game_urls = url_scraper.get_game_urls_playoffs(settings.in_line.year)
+    settings.logger.info(f"Scraped {len(game_urls)} game urls")
+
+    # 2. Get the game data for the list of games
+    data_scraper = BasketRefDataScraper()
+    game_data = data_scraper.get_games_data(game_urls)
+    settings.logger.info(f"Scraped {len(game_data)} games")
+
+    return game_data
 
 
 if __name__ == "__main__":
