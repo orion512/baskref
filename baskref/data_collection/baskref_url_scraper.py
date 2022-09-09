@@ -18,11 +18,11 @@ from dataclasses import dataclass
 from datetime import date
 from urllib import parse
 from requests_html import HTMLResponse
-import src.data_collection.scraper.html_scraper as scr
+import baskref.data_collection.html_scraper as scr
 
 
 @dataclass
-class BasketRefUrlScraper(scr.HTMLScraper):
+class BaskRefUrlScraper(scr.HTMLScraper):
     """
     Class used for generating the URLs for scraping BasketballRefernce.
     Besides simple generation it also includes scraping and parsing needed

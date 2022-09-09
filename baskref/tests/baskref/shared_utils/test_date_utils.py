@@ -7,7 +7,7 @@ Author: Dominik Zulovec Sajovic - August 2022
 from datetime import datetime
 from argparse import ArgumentTypeError
 import pytest
-from src.utils.date_utils import valid_date
+from baskref.shared_utils.date_utils import valid_date
 
 
 class TestDateUtils:

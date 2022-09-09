@@ -1,93 +1,137 @@
-# Basketball Scraper
+# BaskRef (Basketball Scraper)
 
 The goal of this project is to provide a data collection utility for 
-NBA basketball data. The data is then saved into a csv to be used by
-a different utility.
+NBA basketball data. The collection strategy is to scrape data from 
+https://www.basketball-reference.com.
+The data can then be saved into a csv to be used by a different utility.
 
-An optional future upgrade to the project will be to allow to store the
-data into a postgreSQL database directly.
+## About the Package
 
-## How to Setup?
+### What data are we collecting?
 
-### Environment
+- games & game stats (in depth stats of the games)
+    - by day
+    - by whole season (regular + playoffs)
+    - by playoffs
+- teams (Not Implemented)
+- players (Not Implemented)
+- game logs (Not Implemented)
+- player stats (Not Implemented)
 
-Make sure th environment has the pip package manager.
-https://pip.pypa.io/en/stable/installation/
+## How to Install & Run the Package?
+
+Install the project
+```bash
+pip install baskref
+```
+
+Set logging level (optional)
+```bash
+# INFO, DEBUG, ERROR
+export LOG_LEVEL=DEBUG
+# if not set default value is INFO
+```
+
+Scrape all games for the 7th of January 2022.
+```bash
+baskref -t g -d 2022-01-07 -fp datasets
+# if you don't install the package
+python run.py -t g -d 2022-01-07 -fp datasets
+```
+
+Scrape all games for the 2006 NBA season (regular season + playoffs).
+```bash
+baskref -t gs -y 2006 -fp datasets
+# if you don't install the package
+python run.py -t gs -y 2006 -fp datasets
+```
+
+Scrape all games for the 2006 NBA playoffs.
+```bash
+baskref -t gp -y 2006 -fp datasets
+# if you don't install the package
+python run.py -t gp -y 2006 -fp datasets
+```
+
+## How to Use the Package?
 
 Install requirements
 ```bash
 pip install -r requirements.txt
 ```
 
-**Virtual Environment (optional)**
-You might want to use a virtual environment for executing the project.
+### Data Collection Utility
+This refers to the scraping functionalities.
 
-Create a new virtual environemnt
+For any mode of collection first you need to import the below classes.
+```python
+from baskref.data_collection import (
+    BaskRefUrlScraper,
+    BaskRefDataScraper,
+)
 ```
-python -m venv venv  # The second parameter is a path to the virtual env.
-```
+The BaskRefDataScraper.get_games_data returns a list of dictionaries.
 
-Activate the new virtual environment
-```
-# Windows
-.\venv\Scripts\activate
+Collect games for a specific day
+```python
+from datetime import date
 
-# Unix
-source venv/bin/activate
-```
-
-Leaving the virtual environment
-```
-deactivate
-```
-
-## How to Run?
-
-Scrape all games for the 7th of January 2022.
-```
-python run.py -t g -d 2022-01-07 -fp datasets
+url_scraper = BaskRefUrlScraper()
+game_urls = url_scraper.get_game_urls_day(date('2022-01-07'))
+data_scraper = BaskRefDataScraper()
+game_data = data_scraper.get_games_data(game_urls)
 ```
 
-Scrape all games for the 2006 NBA season (regular season + playoffs).
-```
-python run.py -t gs -y 2006 -fp datasets
-```
-
-Scrape all games for the 2006 NBA playoffs.
-```
-python run.py -t gp -y 2006 -fp datasets
+Collect games for a specific season (regular + playoffs)
+```python
+url_scraper = BaskRefUrlScraper()
+game_urls = url_scraper.get_game_urls_year(2006)
+data_scraper = BaskRefDataScraper()
+game_data = data_scraper.get_games_data(game_urls)
 ```
 
-#### What data are we collecting?
-- teams
-- players
-- game logs
-- player stats
+Collect games for a specific postseason
+```python
+url_scraper = BaskRefUrlScraper()
+game_urls = url_scraper.get_game_urls_playoffs(2006)
+data_scraper = BaskRefDataScraper()
+game_data = data_scraper.get_games_data(game_urls)
+```
 
+### Data Saving Package
+This refers to the saving of the data.
+
+Save a list of dictionaries to a CSV file.
+```python
+import os
+from baskref.data_saving.file_saver import save_file_from_list
+
+save_path = os.path.join('datasets', 'file_name.csv')
+save_file_from_list(game_data, save_path)
+```
 
 ## How to Run Tests?
 
-* Run all tests with Pytest
+Run all tests with Pytest
 ```
 pytest
 ```
 
-* Run just the unit tests
+Run just the unit tests
 ```
 pytest -v -m unittest
 ```
 
-* Run just the integration tests
+Run just the integration tests
 ```
 pytest -v -m integrationtest
 ```
 
-* Run coverage
+Run coverage
 ```
-coverage run --source=src -m pytest
+coverage run --source=baskref -m pytest
 coverage report --omit="*/test*" -m --skip-empty
 ```
-
 
 ## Code Formating
 
@@ -124,6 +168,30 @@ the configuration for mypy is stored in pyproject.toml file.
 mypy .
 ```
 
+## Bonus
+
+**Virtual Environment (optional)**
+You might want to use a virtual environment for executing the project.
+
+Create a new virtual environemnt
+```
+python -m venv venv  # The second parameter is a path to the virtual env.
+```
+
+Activate the new virtual environment
+```
+# Windows
+.\venv\Scripts\activate
+
+# Unix
+source venv/bin/activate
+```
+
+Leaving the virtual environment
+```
+deactivate
+```
+
 ### Contributors
 
-1. Dominik Zulovec Sajovic
+1. [Dominik Zulovec Sajovic](https://www.linkedin.com/in/dominik-zulovec-sajovic/)

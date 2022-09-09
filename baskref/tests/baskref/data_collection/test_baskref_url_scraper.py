@@ -6,14 +6,14 @@ Author: Dominik Zulovec Sajovic - August 2022
 
 from datetime import date
 import pytest
-from src.data_collection.scraper import (
-    BasketRefUrlScraper,
+from baskref.data_collection import (
+    BaskRefUrlScraper,
 )
 
 # pylint: disable=protected-access
 
 
-class TestBasketRefUrlScraper:
+class TestBaskRefUrlScraper:
     """Class for BasketRefUrlScraper class"""
 
     test_url_generation: list[tuple] = [
@@ -49,7 +49,7 @@ class TestBasketRefUrlScraper:
     ):
         """Tests the function generate_season_games_url."""
 
-        br_scraper = BasketRefUrlScraper(input_url)
+        br_scraper = BaskRefUrlScraper(input_url)
 
         returned_status = br_scraper._generate_season_games_url(input_year)
         assert expected_status == returned_status
@@ -73,7 +73,7 @@ class TestBasketRefUrlScraper:
     ):
         """Tests the function generate_season_games_url."""
 
-        br_scraper = BasketRefUrlScraper()
+        br_scraper = BaskRefUrlScraper()
 
         with pytest.raises(raise_err.expected_exception):
             returned_status = br_scraper._generate_season_games_url(input_year)
@@ -95,7 +95,7 @@ class TestBasketRefUrlScraper:
     ):
         """Tests the function scrape_game_urls_day."""
 
-        br_scraper = BasketRefUrlScraper(input_url)
+        br_scraper = BaskRefUrlScraper(input_url)
 
         returned_status = br_scraper._generate_daily_games_url(game_date)
         assert expected_status == returned_status
@@ -115,7 +115,7 @@ class TestBasketRefUrlScraper:
     ):
         """Tests the function scrape_game_urls_day."""
 
-        br_scraper = BasketRefUrlScraper()
+        br_scraper = BaskRefUrlScraper()
 
         with pytest.raises(raise_err.expected_exception):
             returned_status = br_scraper._generate_daily_games_url(game_date)

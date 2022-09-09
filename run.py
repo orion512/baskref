@@ -8,11 +8,9 @@ import os
 import argparse
 
 from datetime import date
-from yaml import safe_load
-from dacite import from_dict
-from settings.settings import Settings
-from src.utils.date_utils import valid_date
-from src.basketball_scraper import (
+from baskref.shared_utils.settings_utils import Settings, InLine
+from baskref.shared_utils.date_utils import valid_date
+from baskref import (
     run_data_collection_manager,
     run_data_saving_manager,
 )
@@ -21,20 +19,15 @@ from src.basketball_scraper import (
 def main(args: argparse.Namespace) -> None:
     """The main entry point into the project."""
 
-    # Load the settings
-    with open(args.settings, encoding="utf8") as sett_file:
-        sett_dict = safe_load(sett_file)
+    in_line = InLine(
+        type=args.type,
+        date=args.date,
+        namechar=args.namechar,
+        year=args.year,
+        file_path=args.file_path,
+    )
 
-    sett_dict["in_line"] = {
-        "type": args.type,
-        "date": args.date,
-        "namechar": args.namechar,
-        "year": args.year,
-        "save": args.save,
-        "file_path": args.file_path,
-    }
-
-    settings = from_dict(Settings, sett_dict)
+    settings = Settings(in_line=in_line)
 
     # Run the main packages
     # # 1. Run the data collection
@@ -115,32 +108,15 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "-sv",
-        "--save",
-        help="""
-        Specify the type of data saving (
-            f - saved the file into a CSV
-            db - saved the data into a postgres DB
-        )
-        """,
-        choices=["f", "db"],
-        default="f",
-        type=str,
-    )
-
-    parser.add_argument(
         "-fp",
         "--file_path",
         help="""
-        If type of saving is file (f) then
-        this parameter specifies path where to save the file.
+        This parameter specifies path where to save the file.
         By default it will be set to the root of the project.
         """,
-        default="",
+        default="datasets",
         type=str,
     )
-
-    # TODO: add arguments for saving preference (csv, pg db)
 
     parameters = parser.parse_args()
 

@@ -8,7 +8,7 @@ Author: Dominik Zulovec Sajovic - September 2022
 from unittest.mock import patch
 import pytest
 from requests_html import HTMLResponse, HTMLSession
-from src.data_collection.scraper.html_scraper import (
+from baskref.data_collection.html_scraper import (
     HTMLScraper,
     ScrapingError,
     ScrapingConnError,

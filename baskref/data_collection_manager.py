@@ -21,11 +21,11 @@ Author: Dominik Zulovec Sajovic, May 2022
 
 from typing import List, Callable, Dict
 
-from settings.settings import Settings
-from src.utils.error_utils import IllegalArgumentError
-from src.data_collection.scraper import (
-    BasketRefUrlScraper,
-    BasketRefDataScraper,
+from baskref.shared_utils.settings_utils import Settings
+from baskref.shared_utils.error_utils import IllegalArgumentError
+from baskref.data_collection import (
+    BaskRefUrlScraper,
+    BaskRefDataScraper,
 )
 
 
@@ -61,12 +61,12 @@ def run_daily_game_collector(settings: Settings) -> List:
     settings.logger.info(f"Collecting all games for: {settings.in_line.date}")
 
     # 1. Get all the game urls for the specific day
-    url_scraper = BasketRefUrlScraper()
+    url_scraper = BaskRefUrlScraper()
     game_urls = url_scraper.get_game_urls_day(settings.in_line.date)
     settings.logger.info(f"Scraped {len(game_urls)} game urls")
 
     # 2. Get the game data for the list of games
-    data_scraper = BasketRefDataScraper()
+    data_scraper = BaskRefDataScraper()
     game_data = data_scraper.get_games_data(game_urls)
     settings.logger.info(f"Scraped {len(game_data)} games")
 
@@ -90,12 +90,12 @@ def run_season_games_collector(settings: Settings) -> List:
     settings.logger.info(f"Collecting all games for: {settings.in_line.year}")
 
     # 1. Get all the game urls for the specific year
-    url_scraper = BasketRefUrlScraper()
+    url_scraper = BaskRefUrlScraper()
     game_urls = url_scraper.get_game_urls_year(settings.in_line.year)
     settings.logger.info(f"Scraped {len(game_urls)} game urls")
 
     # 2. Get the game data for the list of games
-    data_scraper = BasketRefDataScraper()
+    data_scraper = BaskRefDataScraper()
     game_data = data_scraper.get_games_data(game_urls)
     settings.logger.info(f"Scraped {len(game_data)} games")
 
@@ -111,12 +111,12 @@ def run_playoffs_game_collector(settings: Settings) -> List:
     )
 
     # 1. Get all the game urls for the specific postseason
-    url_scraper = BasketRefUrlScraper()
+    url_scraper = BaskRefUrlScraper()
     game_urls = url_scraper.get_game_urls_playoffs(settings.in_line.year)
     settings.logger.info(f"Scraped {len(game_urls)} game urls")
 
     # 2. Get the game data for the list of games
-    data_scraper = BasketRefDataScraper()
+    data_scraper = BaskRefDataScraper()
     game_data = data_scraper.get_games_data(game_urls)
     settings.logger.info(f"Scraped {len(game_data)} games")
 

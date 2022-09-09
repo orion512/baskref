@@ -4,7 +4,7 @@ Imports all teh functions from the files in this package
 Author: Dominik Zulovec Sajovic - August 2022
 """
 
-from src.basketball_scraper.data_collection_manager import (
+from baskref.data_collection_manager import (
     run_data_collection_manager,
     run_daily_game_collector,
     run_season_games_collector,
@@ -13,6 +13,6 @@ from src.basketball_scraper.data_collection_manager import (
     run_team_collector,
 )
 
-from src.basketball_scraper.data_saving_manager import (
+from baskref.data_saving_manager import (
     run_data_saving_manager,
 )

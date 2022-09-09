@@ -3,6 +3,7 @@ Settings skeleton for the project
 """
 
 
+import os
 import sys
 import logging
 
@@ -11,46 +12,30 @@ from datetime import date
 
 
 @dataclass
-class Environment:
-    """Class for environmental settings"""
-
-    name: str
-
-
-@dataclass
 class InLine:
-    """Class for storing arguments passed in-line to run.py"""
+    """Class for storing command line passed arguments"""
 
     type: str
     date: date
     namechar: str
     year: int
-    save: str
     file_path: str
-
-
-@dataclass
-class Saver:
-    """Class for data saving settings"""
-
-    file_bucket: str
 
 
 @dataclass
 class Settings:
     """Class for storing project parameters"""
 
-    environment: Environment
     in_line: InLine
-    logging_level: str
-    logger_name: str
 
     def __post_init__(self):
-        """Rns imiidiately after the initialization"""
-        self.logger = logging.getLogger(self.logger_name)
-        self.logger.setLevel(self.logging_level)
+        """Runs imiidiately after the initialization"""
+
+        log_level = os.getenv("LOG_LEVEL", "INFO")
+        self.logger = logging.getLogger(__name__)
+        self.logger.setLevel(log_level)
         handler = logging.StreamHandler(sys.stdout)
-        handler.setLevel(self.logging_level)
+        handler.setLevel(log_level)
         formatter = logging.Formatter(
             "%(asctime)s\t"
             "%(levelname)s\t"
