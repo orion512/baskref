@@ -1,5 +1,5 @@
 """
-Error utilities.
+Exception classes raised by various operations.
 
 Author: Dominik Zulovec Sajovic, June 2022
 """

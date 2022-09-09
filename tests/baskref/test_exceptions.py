@@ -5,7 +5,7 @@ Author: Dominik Zulovec Sajovic - August 2022
 """
 
 import pytest
-from baskref.shared_utils.error_utils import IllegalArgumentError
+from baskref.exceptions import IllegalArgumentError
 
 
 class TestErrorUtils:

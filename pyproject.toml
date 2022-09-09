@@ -1,3 +1,26 @@
+[project]
+name = "baskref"
+version = "0.0.1"
+authors = [
+  {name="Dominik Zulovec Sajovic", email="N/A"},
+]
+description = "BaskRef is a tool to scrape basketball Data from the web."
+readme = "README.md"
+license = {file="LICENSE"}
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/orion512/basketball_scraper"
+"Bug Tracker" = "https://github.com/orion512/basketball_scraper/issues"
+
+[project.scripts]
+baskref = "baskref:run_baskref"
+
 [tool.black]
 line-length = 79
 target-version = ['py38']

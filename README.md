@@ -1,4 +1,5 @@
 # BaskRef (Basketball Scraper)
+BaskRef is a tool to scrape basketball Data from the web.
 
 The goal of this project is to provide a data collection utility for 
 NBA basketball data. The collection strategy is to scrape data from 
@@ -36,21 +37,21 @@ Scrape all games for the 7th of January 2022.
 ```bash
 baskref -t g -d 2022-01-07 -fp datasets
 # if you don't install the package
-python run.py -t g -d 2022-01-07 -fp datasets
+python -c "from baskref import run_baskref; run_baskref()" -t g -d 2022-01-07 -fp datasets
 ```
 
 Scrape all games for the 2006 NBA season (regular season + playoffs).
 ```bash
 baskref -t gs -y 2006 -fp datasets
 # if you don't install the package
-python run.py -t gs -y 2006 -fp datasets
+python -c "from baskref import run_baskref; run_baskref()" -t gs -y 2006 -fp datasets
 ```
 
 Scrape all games for the 2006 NBA playoffs.
 ```bash
 baskref -t gp -y 2006 -fp datasets
 # if you don't install the package
-python run.py -t gp -y 2006 -fp datasets
+python -c "from baskref import run_baskref; run_baskref()" -t gp -y 2006 -fp datasets
 ```
 
 ## How to Use the Package?
