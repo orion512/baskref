@@ -78,7 +78,12 @@ Collect games for a specific day
 from datetime import date
 
 url_scraper = BaskRefUrlScraper()
-game_urls = url_scraper.get_game_urls_day(date('2022-01-07'))
+game_urls = url_scraper.get_game_urls_day(date(2022,1,7))
+data_scraper = BaskRefDataScraper()
+game_data = data_scraper.get_games_data(game_urls)
+
+url_scraper = BaskRefUrlScraper()
+game_urls = url_scraper.get_game_urls_day(date(2022,1,7))
 data_scraper = BaskRefDataScraper()
 game_data = data_scraper.get_games_data(game_urls)
 ```

@@ -1,8 +1,12 @@
+[build-system]
+requires = ["setuptools~=62.6"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "baskref"
 version = "0.0.1"
 authors = [
-  {name="Dominik Zulovec Sajovic", email="N/A"},
+  {name="Dominik Zulovec Sajovic", email="dominik.zsajovic@gmail.com"},
 ]
 description = "BaskRef is a tool to scrape basketball Data from the web."
 readme = "README.md"

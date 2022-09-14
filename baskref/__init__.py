@@ -47,7 +47,6 @@ def run_baskref() -> None:
         )
         """,
         choices=["g", "t", "p", "gs", "gp"],
-        default="g",
         type=str,
     )
 
