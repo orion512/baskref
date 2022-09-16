@@ -14,6 +14,8 @@ The data can then be saved into a csv to be used by a different utility.
     - by day
     - by whole season (regular + playoffs)
     - by playoffs
+
+#### Future Collections (Not yet implemented)
 - teams (Not Implemented)
 - players (Not Implemented)
 - game logs (Not Implemented)
@@ -29,8 +31,8 @@ pip install baskref
 Set logging level (optional)
 ```bash
 # INFO, DEBUG, ERROR
-export LOG_LEVEL=DEBUG
 # if not set default value is INFO
+export LOG_LEVEL=DEBUG
 ```
 
 Scrape all games for the 7th of January 2022.
@@ -64,12 +66,16 @@ pip install -r requirements.txt
 ### Data Collection Utility
 This refers to the scraping functionalities.
 
-For any mode of collection first you need to import the below classes.
+For any mode of collection first you need to import and initialize 
+the below classes.
 ```python
 from baskref.data_collection import (
     BaskRefUrlScraper,
     BaskRefDataScraper,
 )
+
+url_scraper = BaskRefUrlScraper()
+data_scraper = BaskRefDataScraper()
 ```
 The BaskRefDataScraper.get_games_data returns a list of dictionaries.
 
@@ -77,30 +83,19 @@ Collect games for a specific day
 ```python
 from datetime import date
 
-url_scraper = BaskRefUrlScraper()
 game_urls = url_scraper.get_game_urls_day(date(2022,1,7))
-data_scraper = BaskRefDataScraper()
-game_data = data_scraper.get_games_data(game_urls)
-
-url_scraper = BaskRefUrlScraper()
-game_urls = url_scraper.get_game_urls_day(date(2022,1,7))
-data_scraper = BaskRefDataScraper()
 game_data = data_scraper.get_games_data(game_urls)
 ```
 
 Collect games for a specific season (regular + playoffs)
 ```python
-url_scraper = BaskRefUrlScraper()
 game_urls = url_scraper.get_game_urls_year(2006)
-data_scraper = BaskRefDataScraper()
 game_data = data_scraper.get_games_data(game_urls)
 ```
 
 Collect games for a specific postseason
 ```python
-url_scraper = BaskRefUrlScraper()
 game_urls = url_scraper.get_game_urls_playoffs(2006)
-data_scraper = BaskRefDataScraper()
 game_data = data_scraper.get_games_data(game_urls)
 ```
 
@@ -159,10 +154,7 @@ the configuration for pylint is stored in .pylintrc file.
 
 ```bash 
 # run pylint over the entire code base
-pylint run.py
-pylint settings
-pylint src
-pylint tests
+pylint baskref
 ```
 
 ### MyPy
@@ -196,6 +188,16 @@ source venv/bin/activate
 Leaving the virtual environment
 ```
 deactivate
+```
+
+**Project Dependencies**
+```bash
+requests-html
+pylint
+black
+pytest
+mypy
+pre-commit
 ```
 
 ### Contributors
