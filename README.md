@@ -168,6 +168,11 @@ mypy .
 
 ## Bonus
 
+**Install the project for dev**
+```
+pip install -e .[dev]
+```
+
 **Virtual Environment (optional)**
 You might want to use a virtual environment for executing the project.
 
