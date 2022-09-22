@@ -168,12 +168,9 @@ mypy .
 
 ## Bonus
 
-**Install the project for dev**
-```
-pip install -e .[dev]
-```
+### Prepare project for development
 
-**Virtual Environment (optional)**
+**1. Virtual Environment (optional)**
 You might want to use a virtual environment for executing the project.
 
 Create a new virtual environemnt
@@ -195,16 +192,16 @@ Leaving the virtual environment
 deactivate
 ```
 
-**Project Dependencies**
-```bash
-requests-html
-pylint
-black
-pytest
-mypy
-pre-commit
+**2. Install all the dev requirements**
+```
+pip install -r requirements_dev.txt
 ```
 
-### Contributors
+**3. Install the pre-commit hook**
+```
+pre-commit install
+```
+
+## Contributors
 
 1. [Dominik Zulovec Sajovic](https://www.linkedin.com/in/dominik-zulovec-sajovic/)

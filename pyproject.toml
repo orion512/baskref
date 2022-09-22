@@ -31,7 +31,7 @@ baskref = "baskref:run_baskref"
 [tool.black]
 line-length = 79
 target-version = ['py38']
-#include = '\.pyi?$'
+
 exclude = '''
 /(
   \.toml
@@ -45,3 +45,10 @@ exclude = '''
 
 [tool.mypy]
 ignore_missing_imports = true
+
+[tool.check-manifest]
+ignore = [
+  ".travis.yml", "tests/*", "requirements_dev.txt",
+  "datasets", ".pre-commit-config.yaml", ".pylintrc", "pytest.ini",
+  "venv", 
+  ]
