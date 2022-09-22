@@ -8,13 +8,14 @@ version = "0.0.1"
 authors = [
   {name="Dominik Zulovec Sajovic", email="dominik.zsajovic@gmail.com"},
 ]
-description = "BaskRef is a tool to scrape basketball Data from the web."
+keywords = ["basketball", "web scraper", "python"]
+description = "baskRef is a tool to scrape basketball Data from the web."
 readme = "README.md"
 license = {file="LICENSE"}
 requires-python = ">=3.8"
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
+    "License :: MIT License",
     "Operating System :: OS Independent",
 ]
 dependencies = [

@@ -32,7 +32,7 @@ class Settings:
         """Runs imiidiately after the initialization"""
 
         log_level = os.getenv("LOG_LEVEL", "INFO")
-        self.logger = logging.getLogger(__name__)
+        self.logger = logging.getLogger("baskref")
         self.logger.setLevel(log_level)
         handler = logging.StreamHandler(sys.stdout)
         handler.setLevel(log_level)

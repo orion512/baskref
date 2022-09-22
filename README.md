@@ -39,21 +39,21 @@ Scrape all games for the 7th of January 2022.
 ```bash
 baskref -t g -d 2022-01-07 -fp datasets
 # if you don't install the package
-python -c "from baskref import run_baskref; run_baskref()" -t g -d 2022-01-07 -fp datasets
+# python -c "from baskref import run_baskref; run_baskref()" -t g -d 2022-01-07 -fp datasets
 ```
 
 Scrape all games for the 2006 NBA season (regular season + playoffs).
 ```bash
 baskref -t gs -y 2006 -fp datasets
 # if you don't install the package
-python -c "from baskref import run_baskref; run_baskref()" -t gs -y 2006 -fp datasets
+# python -c "from baskref import run_baskref; run_baskref()" -t gs -y 2006 -fp datasets
 ```
 
 Scrape all games for the 2006 NBA playoffs.
 ```bash
 baskref -t gp -y 2006 -fp datasets
 # if you don't install the package
-python -c "from baskref import run_baskref; run_baskref()" -t gp -y 2006 -fp datasets
+# python -c "from baskref import run_baskref; run_baskref()" -t gp -y 2006 -fp datasets
 ```
 
 ## How to Use the Package?
@@ -118,17 +118,7 @@ Run all tests with Pytest
 pytest
 ```
 
-Run just the unit tests
-```
-pytest -v -m unittest
-```
-
-Run just the integration tests
-```
-pytest -v -m integrationtest
-```
-
-Run coverage
+Run all tests with coverage
 ```
 coverage run --source=baskref -m pytest
 coverage report --omit="*/test*" -m --skip-empty
@@ -170,8 +160,10 @@ mypy .
 
 ### Prepare project for development
 
-**1. Virtual Environment (optional)**
-You might want to use a virtual environment for executing the project.
+1. Create Virtual Environment
+
+- You might want to use a virtual environment for executing the project.
+- this is an optional step (if skipping go straight to step 2)
 
 Create a new virtual environemnt
 ```
@@ -192,12 +184,13 @@ Leaving the virtual environment
 deactivate
 ```
 
-**2. Install all the dev requirements**
+2. Install all the dev requirements
+
 ```
 pip install -r requirements_dev.txt
 ```
 
-**3. Install the pre-commit hook**
+3. Install the pre-commit hook
 ```
 pre-commit install
 ```
