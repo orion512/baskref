@@ -1,5 +1,5 @@
 """
-Date utilities.
+Util function for the whole package.
 
 Author: Dominik Zulovec Sajovic, May 2022
 """

@@ -1,5 +1,5 @@
 """
-Holds the tests for the date utils functions.
+Holds the tests for the util.
 
 Author: Dominik Zulovec Sajovic - August 2022
 """
@@ -7,7 +7,7 @@ Author: Dominik Zulovec Sajovic - August 2022
 from datetime import datetime
 from argparse import ArgumentTypeError
 import pytest
-from src.utils.date_utils import valid_date
+from baskref.utils import valid_date
 
 
 class TestDateUtils:

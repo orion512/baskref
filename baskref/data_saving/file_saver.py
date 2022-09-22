@@ -5,11 +5,18 @@ Author: Dominik Zulovec Sajovic, June 2022
 """
 
 import os
-import pandas as pd
+import csv
 
 
 def save_file_from_list(data: list[dict], filepath: str) -> None:
-    """Saves a list of dictionaries as a CSV"""
+    """
+    Saves a list of dictionaries as a CSV.
+    This used to be implemented with pandas
+    pd.DataFrame(data).to_csv(filepath, index=False)
+    """
+
+    if len(data) == 0:
+        return
 
     # check that we have a list of dictionaries
     if not isinstance(data, list):
@@ -25,7 +32,10 @@ def save_file_from_list(data: list[dict], filepath: str) -> None:
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
 
-    pd.DataFrame(data).to_csv(filepath, index=False)
+    with open(filepath, "w", newline="", encoding="UTF-8") as csv_file:
+        writer = csv.DictWriter(csv_file, fieldnames=data[0].keys())
+        writer.writeheader()
+        writer.writerows(data)
 
 
 def check_all_elements_dicts(list_param: list) -> bool:

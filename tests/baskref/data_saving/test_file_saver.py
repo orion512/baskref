@@ -7,7 +7,7 @@ Author: Dominik Zulovec Sajovic - August 2022
 import os
 import pytest
 import pandas as pd
-from src.data_saving.file_saver.pandas_saver import (
+from baskref.data_saving.file_saver import (
     check_all_elements_dicts,
     save_file_from_list,
 )
