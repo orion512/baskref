@@ -8,9 +8,12 @@ Author: Dominik Zulovec Sajovic, September 2022
 from typing import Callable, Any, Union
 from dataclasses import dataclass
 import requests
+from requests import Response
 from requests.exceptions import RequestException
 from bs4 import BeautifulSoup
 
+
+#### I have a jupyter noebook in baskref_db project!!!!!!!!!!!!!!!!!!!!!!!
 
 @dataclass
 class HTMLScraper:
@@ -24,39 +27,40 @@ class HTMLScraper:
         """
 
         page = self.get_page(url)
-        return parser_fun(page)
+        soup = BeautifulSoup(page, 'html.parser')
+        return parser_fun(soup)
 
     @staticmethod
-    def parse(html: HTMLResponse, parser_fun: Callable) -> Any:
+    def parse(html: BeautifulSoup, parser_fun: Callable) -> Any:
         """
         This function lays out the skeleton for parsing.
-        Unlike the self.scrape function this function accepts the
-        HTMLResponse and not the url (so you are required to get the url
-        contents outside this function). Then uses
-        the provided function to parse out the wanted data.
+        Unlike the self.scrape function this function accepts an HTML in the
+        form of a BeautifulSoup object and not the url
+        (so you are required to get the url contents outside this function).
+        Then uses the provided function to parse out the wanted data.
         """
 
         return parser_fun(html)
 
-    def simple_parse(
-        self, html: Element, finder: str, txt: bool = True
-    ) -> Union[str, Element]:
-        """
-        Provided an HTML Element object and a CSS finder
-        it parses out the text (or whole element) of the first element found.
-        Sometime the page doesn't include attendance in which case the
-        method return None.
-        :return: the text of the element
-        """
+    # def simple_parse(
+    #     self, html: Element, finder: str, txt: bool = True
+    # ) -> Union[str, Element]:
+    #     """
+    #     Provided an HTML Element object and a CSS finder
+    #     it parses out the text (or whole element) of the first element found.
+    #     Sometime the page doesn't include attendance in which case the
+    #     method return None.
+    #     :return: the text of the element
+    #     """
 
-        ele = html.find(finder, first=True)
+    #     ele = html.find(finder, first=True)
 
-        if txt:
-            return ele.text
+    #     if txt:
+    #         return ele.text
 
-        return ele
+    #     return ele
 
-    def get_page(self, url: str) -> HTMLResponse:
+    def get_page(self, url: str) -> Response:
         """
         This function scrapes a static webpage from the web.
         It implements a strategy to avoid blocking by the host website.
@@ -74,17 +78,17 @@ class HTMLScraper:
         with requests.Session() as session:
             page = session.get(url)
 
-        if self._is_success_code(page.status_code):
+        if self._is_success_response(page):
             return page
 
         # TODO: logger here
         # 2. GET request with a proxy IP (if available)
         # TODO: implement proxy here
 
-        if self._is_success_code(page.status_code):
+        if self._is_success_response(page):
             return page
 
-        # 3. GET request with a randomized user-agent
+        # 3. GET request with a randomized user-agent and proxy (if available)
         from fake_useragent import UserAgent
         with requests.Session() as session:
             # TODO: add proxy here as well
@@ -93,7 +97,7 @@ class HTMLScraper:
                 headers={'User-Agent': UserAgent().random}
                 )
         
-        if self._is_success_code(page.status_code):
+        if self._is_success_response(page.status_code):
             return page
 
         # 4. Browser automation (Selenium, puppeteer)
@@ -102,6 +106,22 @@ class HTMLScraper:
         
 
         raise ScrapingError(url, page.status_code)
+
+
+    @staticmethod
+    def _is_success_response(self, resp: Response) -> bool:
+        """
+        Validates if the passed object is a requests.Response and
+        has a valid status code.
+        """
+
+        if not isinstance(resp, Response):
+            return False
+
+        if not self._is_success_code(resp.status_code):
+            return False
+        
+        return True
 
 
     @staticmethod
@@ -140,3 +160,6 @@ if __name__ == "__main__":
     pg = hs.get_page("https://www.basketball-reference.com/boxscores/?month=10&day=20&year=2021")
 
     print(pg)
+
+    soup = BeautifulSoup(pg.text, 'html.parser')
+    print(type(soup))
