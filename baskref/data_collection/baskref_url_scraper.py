@@ -136,7 +136,7 @@ class BaskRefUrlScraper(scr.HTMLScraper):
                 
         return game_urls
 
-    def _parse_months_in_year(self, yearly_page: HTMLResponse) -> list:
+    def _parse_months_in_year(self, yearly_page: BeautifulSoup) -> list:
         """
         Parses the month urls out of the html containing monthly urls.
         :game_date: A game_date to scrape games on
@@ -148,7 +148,7 @@ class BaskRefUrlScraper(scr.HTMLScraper):
             for a in yearly_page.html.find("div.filter > div > a")
         ]
 
-    def _parse_monthly_games(self, monthly_games_page: HTMLResponse) -> list:
+    def _parse_monthly_games(self, monthly_games_page: BeautifulSoup) -> list:
         """
         Parses the games out of the html containing monthly games.
         :game_date: A game_date to scrape games on

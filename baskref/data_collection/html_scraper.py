@@ -27,7 +27,7 @@ class HTMLScraper:
         """
 
         page = self.get_page(url)
-        soup = BeautifulSoup(page, 'html.parser')
+        soup = BeautifulSoup(page.text, 'html.parser')
         return parser_fun(soup)
 
     @staticmethod
@@ -108,7 +108,6 @@ class HTMLScraper:
         raise ScrapingError(url, page.status_code)
 
 
-    @staticmethod
     def _is_success_response(self, resp: Response) -> bool:
         """
         Validates if the passed object is a requests.Response and
@@ -151,15 +150,3 @@ class ScrapingError(Exception):
         """init function"""
         self.message = f"Couldn't scrape {url}. Status code: {st_code}"
         super().__init__(self.message)
-
-
-if __name__ == "__main__":
-    print("Running Script")
-
-    hs = HTMLScraper()
-    pg = hs.get_page("https://www.basketball-reference.com/boxscores/?month=10&day=20&year=2021")
-
-    print(pg)
-
-    soup = BeautifulSoup(pg.text, 'html.parser')
-    print(type(soup))
