@@ -2,7 +2,7 @@
 ignore=venv
 
 [MESSAGES CONTROL]
-disable=fixme,too-few-public-methods
+disable=fixme,too-few-public-methods,logging-fstring-interpolation
 
 [FORMAT]
 max-line-length=79

@@ -132,8 +132,8 @@ class BaskRefUrlScraper(scr.HTMLScraper):
             anch = p.find("a")
             if anch is not None:
                 url = anch.attrs["href"]
-                game_urls.append(self.base_url + url)#
-                
+                game_urls.append(self.base_url + url)  #
+
         return game_urls
 
     def _parse_months_in_year(self, yearly_page: BeautifulSoup) -> list:
@@ -145,7 +145,7 @@ class BaskRefUrlScraper(scr.HTMLScraper):
 
         return [
             self.base_url + a.attrs["href"]
-            for a in yearly_page.html.find("div.filter > div > a")
+            for a in yearly_page.select("div.filter > div > a")
         ]
 
     def _parse_monthly_games(self, monthly_games_page: BeautifulSoup) -> list:
@@ -158,10 +158,10 @@ class BaskRefUrlScraper(scr.HTMLScraper):
         element_finder = 'td[data-stat="box_score_text"]'
         game_urls = []
 
-        for td in monthly_games_page.html.find(element_finder):
-            anch = td.find("a", first=True)
+        for td in monthly_games_page.select(element_finder):
+            anch = td.find("a")
             if anch is not None:
-                url = anch.find("a", first=True).attrs["href"]
+                url = anch.attrs["href"]
                 game_urls.append(self.base_url + url)
 
         return game_urls

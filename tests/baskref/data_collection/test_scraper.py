@@ -7,11 +7,10 @@ Author: Dominik Zulovec Sajovic - September 2022
 
 from unittest.mock import patch
 import pytest
-from requests_html import HTMLResponse, HTMLSession
+from requests import Response
 from baskref.data_collection.html_scraper import (
     HTMLScraper,
     ScrapingError,
-    ScrapingConnError,
 )
 
 # pylint: disable=protected-access
@@ -21,13 +20,12 @@ class TestScraper:
     """Class for Scraper class"""
 
     @staticmethod
-    def _generate_response(html_cont: str, status_code: int) -> HTMLResponse:
-        """Generates a HTMLResponse to be used for testing"""
+    def _generate_response(html_cont: str, status_code: int) -> Response:
+        """Generates a requests.Response to be used for testing"""
 
-        with HTMLSession() as ses:
-            res = HTMLResponse(ses)
-            res._html = html_cont
-            res.status_code = status_code
+        res = Response()
+        res._content = html_cont.encode("utf-8")
+        res.status_code = status_code
 
         return res
 
@@ -38,7 +36,7 @@ class TestScraper:
     ]
 
     @pytest.mark.unittest
-    @patch("requests_html.HTMLSession.get")
+    @patch("requests.Session.get")
     @pytest.mark.parametrize("input_url, website_html, code", test_get_pages)
     def test_get_page(self, req_mock, input_url, website_html, code):
         """Tests the function get_page."""
@@ -49,7 +47,7 @@ class TestScraper:
 
         page = scp.get_page(input_url)
 
-        assert page.html == website_html
+        assert page.text == website_html
         assert page.status_code == code
 
     test_get_pages_raise: list[tuple] = [
@@ -60,7 +58,7 @@ class TestScraper:
     ]
 
     @pytest.mark.unittest
-    @patch("requests_html.HTMLSession.get")
+    @patch("requests.Session.get")
     @pytest.mark.parametrize(
         "code, expected_status, raise_err", test_get_pages_raise
     )
@@ -120,24 +118,3 @@ class TestScrapingError:
 
         assert input_url in exp.message
         assert str(input_code) in exp.message
-
-
-class TestScrapingConnError:
-    """Class for ScrapingConnError class"""
-
-    test_scraping_errors: list[str] = [
-        ("some_url"),
-        ("http://neki.com"),
-        ("https://neki.com"),
-        ("www.neki.com"),
-        ("https://neki.com/some_path/some_other_oath"),
-    ]
-
-    @pytest.mark.unittest
-    @pytest.mark.parametrize("input_url", test_scraping_errors)
-    def test_scraping_conn_error(self, input_url):
-        """Tests the message in the ScrapingConnError"""
-
-        exp = ScrapingConnError(input_url)
-
-        assert input_url in exp.message

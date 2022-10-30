@@ -147,7 +147,7 @@ class BaskRefDataScraper(scr.HTMLScraper):
         if "Attendance" not in html.text:
             return None
 
-        cont = str(html.text.encode('ascii', 'replace'))
+        cont = str(html.text.encode("ascii", "replace"))
 
         attendance_text = cont[
             cont.index("Attendance") : cont.index("Attendance") + 20
@@ -187,60 +187,30 @@ class BaskRefDataScraper(scr.HTMLScraper):
         tb_foot = table.select_one("tfoot")
 
         game_dic = {
-            f"{team}_fg": int(
-                tb_foot.select_one("td[data-stat=fg]").text
-            ),
-            f"{team}_fga": int(
-                tb_foot.select_one("td[data-stat=fga]").text
-            ),
+            f"{team}_fg": int(tb_foot.select_one("td[data-stat=fg]").text),
+            f"{team}_fga": int(tb_foot.select_one("td[data-stat=fga]").text),
             f"{team}_fg_pct": float(
                 tb_foot.select_one("td[data-stat=fg_pct]").text
             ),
-            f"{team}_fg3": int(
-                tb_foot.select_one("td[data-stat=fg3]").text
-            ),
-            f"{team}_fg3a": int(
-                tb_foot.select_one("td[data-stat=fg3a]").text
-            ),
+            f"{team}_fg3": int(tb_foot.select_one("td[data-stat=fg3]").text),
+            f"{team}_fg3a": int(tb_foot.select_one("td[data-stat=fg3a]").text),
             f"{team}_fg3_pct": float(
                 tb_foot.select_one("td[data-stat=fg3_pct]").text
             ),
-            f"{team}_ft": int(
-                tb_foot.select_one("td[data-stat=ft]").text
-            ),
-            f"{team}_fta": int(
-                tb_foot.select_one("td[data-stat=fta]").text
-            ),
+            f"{team}_ft": int(tb_foot.select_one("td[data-stat=ft]").text),
+            f"{team}_fta": int(tb_foot.select_one("td[data-stat=fta]").text),
             f"{team}_ft_pct": float(
                 tb_foot.select_one("td[data-stat=ft_pct]").text
             ),
-            f"{team}_orb": int(
-                tb_foot.select_one("td[data-stat=orb]").text
-            ),
-            f"{team}_drb": int(
-                tb_foot.select_one("td[data-stat=drb]").text
-            ),
-            f"{team}_trb": int(
-                tb_foot.select_one("td[data-stat=trb]").text
-            ),
-            f"{team}_ast": int(
-                tb_foot.select_one("td[data-stat=ast]").text
-            ),
-            f"{team}_stl": int(
-                tb_foot.select_one("td[data-stat=stl]").text
-            ),
-            f"{team}_blk": int(
-                tb_foot.select_one("td[data-stat=blk]").text
-            ),
-            f"{team}_tov": int(
-                tb_foot.select_one("td[data-stat=tov]").text
-            ),
-            f"{team}_pf": int(
-                tb_foot.select_one("td[data-stat=pf]").text
-            ),
-            f"{team}_pts": int(
-                tb_foot.select_one("td[data-stat=pts]").text
-            ),
+            f"{team}_orb": int(tb_foot.select_one("td[data-stat=orb]").text),
+            f"{team}_drb": int(tb_foot.select_one("td[data-stat=drb]").text),
+            f"{team}_trb": int(tb_foot.select_one("td[data-stat=trb]").text),
+            f"{team}_ast": int(tb_foot.select_one("td[data-stat=ast]").text),
+            f"{team}_stl": int(tb_foot.select_one("td[data-stat=stl]").text),
+            f"{team}_blk": int(tb_foot.select_one("td[data-stat=blk]").text),
+            f"{team}_tov": int(tb_foot.select_one("td[data-stat=tov]").text),
+            f"{team}_pf": int(tb_foot.select_one("td[data-stat=pf]").text),
+            f"{team}_pts": int(tb_foot.select_one("td[data-stat=pts]").text),
         }
 
         return game_dic

@@ -5,15 +5,16 @@ Author: Dominik Zulovec Sajovic, September 2022
 """
 
 
-from typing import Callable, Any, Union
+from typing import Callable, Any
 from dataclasses import dataclass
 import requests
 from requests import Response
-from requests.exceptions import RequestException
 from bs4 import BeautifulSoup
+from fake_useragent import UserAgent
 
 
 #### I have a jupyter noebook in baskref_db project!!!!!!!!!!!!!!!!!!!!!!!
+
 
 @dataclass
 class HTMLScraper:
@@ -27,7 +28,7 @@ class HTMLScraper:
         """
 
         page = self.get_page(url)
-        soup = BeautifulSoup(page.text, 'html.parser')
+        soup = BeautifulSoup(page.text, "html.parser")
         return parser_fun(soup)
 
     @staticmethod
@@ -41,24 +42,6 @@ class HTMLScraper:
         """
 
         return parser_fun(html)
-
-    # def simple_parse(
-    #     self, html: Element, finder: str, txt: bool = True
-    # ) -> Union[str, Element]:
-    #     """
-    #     Provided an HTML Element object and a CSS finder
-    #     it parses out the text (or whole element) of the first element found.
-    #     Sometime the page doesn't include attendance in which case the
-    #     method return None.
-    #     :return: the text of the element
-    #     """
-
-    #     ele = html.find(finder, first=True)
-
-    #     if txt:
-    #         return ele.text
-
-    #     return ele
 
     def get_page(self, url: str) -> Response:
         """
@@ -89,24 +72,20 @@ class HTMLScraper:
             return page
 
         # 3. GET request with a randomized user-agent and proxy (if available)
-        from fake_useragent import UserAgent
+        # from fake_useragent import UserAgent
+
         with requests.Session() as session:
             # TODO: add proxy here as well
-            page = session.get(
-                url,
-                headers={'User-Agent': UserAgent().random}
-                )
-        
-        if self._is_success_response(page.status_code):
+            page = session.get(url, headers={"User-Agent": UserAgent().random})
+
+        if self._is_success_response(page):
             return page
 
         # 4. Browser automation (Selenium, puppeteer)
         # TODO: implement scrape with browser automation
         # TODO: form a requests.Response
-        
 
         raise ScrapingError(url, page.status_code)
-
 
     def _is_success_response(self, resp: Response) -> bool:
         """
@@ -119,9 +98,8 @@ class HTMLScraper:
 
         if not self._is_success_code(resp.status_code):
             return False
-        
-        return True
 
+        return True
 
     @staticmethod
     def _is_success_code(code: int) -> bool:

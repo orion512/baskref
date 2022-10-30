@@ -30,9 +30,9 @@ def run_baskref() -> None:
 
     logging.basicConfig(
         stream=sys.stdout,
-        level=os.getenv("LOG_LEVEL", "INFO"), 
+        level=os.getenv("LOG_LEVEL", "INFO"),
         format="""[%(asctime)s]\t%(levelname)s\t"""
-        """%(name)s:%(lineno)d\t%(message)s"""
+        """%(name)s:%(lineno)d\t%(message)s""",
     )
 
     parser = argparse.ArgumentParser()
@@ -218,9 +218,7 @@ def run_playoffs_game_collector(settings: Settings) -> List:
     """Orchestrates the collection of all games in a playoff"""
 
     logger.info("PLAYOFF GAME COLLECTOR MODE")
-    logger.info(
-        f"Collecting all games for: {settings.in_line.year} playoffs"
-    )
+    logger.info(f"Collecting all games for: {settings.in_line.year} playoffs")
 
     # 1. Get all the game urls for the specific postseason
     url_scraper = BaskRefUrlScraper()
