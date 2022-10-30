@@ -5,10 +5,15 @@ Author: Dominik Zulovec Sajovic, September 2022
 """
 
 
-from typing import Callable, Any, Union
+from typing import Callable, Any
 from dataclasses import dataclass
-from requests.exceptions import RequestException
-from requests_html import HTMLSession, HTMLResponse, Element
+import requests
+from requests import Response
+from bs4 import BeautifulSoup
+from fake_useragent import UserAgent
+
+
+#### I have a jupyter noebook in baskref_db project!!!!!!!!!!!!!!!!!!!!!!!
 
 
 @dataclass
@@ -23,54 +28,78 @@ class HTMLScraper:
         """
 
         page = self.get_page(url)
-        return parser_fun(page)
+        soup = BeautifulSoup(page.text, "html.parser")
+        return parser_fun(soup)
 
     @staticmethod
-    def parse(html: HTMLResponse, parser_fun: Callable) -> Any:
+    def parse(html: BeautifulSoup, parser_fun: Callable) -> Any:
         """
         This function lays out the skeleton for parsing.
-        Unlike the self.scrape function this function accepts the
-        HTMLResponse and not the url (so you are required to get the url
-        contents outside this function). Then uses
-        the provided function to parse out the wanted data.
+        Unlike the self.scrape function this function accepts an HTML in the
+        form of a BeautifulSoup object and not the url
+        (so you are required to get the url contents outside this function).
+        Then uses the provided function to parse out the wanted data.
         """
 
         return parser_fun(html)
 
-    def simple_parse(
-        self, html: Element, finder: str, txt: bool = True
-    ) -> Union[str, Element]:
+    def get_page(self, url: str) -> Response:
         """
-        Provided an HTML Element object and a CSS finder
-        it parses out the text (or whole element) of the first element found.
-        Sometime the page doesn't include attendance in which case the
-        method return None.
-        :return: the text of the element
-        """
+        This function scrapes a static webpage from the web.
+        It implements a strategy to avoid blocking by the host website.
+        1. Normal GET request
+        2. GET request with a proxy IP (if available)
+        3. GET request with a randomized user-agent
+        4. Browser automation (Selenium)
 
-        ele = html.find(finder, first=True)
-
-        if txt:
-            return ele.text
-
-        return ele
-
-    def get_page(self, url: str) -> HTMLResponse:
-        """
-        Makes a get request to the provided URL and
-        return a response if status code is ok (200).
+        If the response status code is ok (200-300)
+        the function returns a Response object.
+        Else it raises an error.
         """
 
-        with HTMLSession() as session:
-            try:
-                page = session.get(url)
-            except RequestException as err:
-                raise ScrapingConnError(url) from err
+        # 1. Normal GET request
+        with requests.Session() as session:
+            page = session.get(url)
 
-            if self._is_success_code(page.status_code):
-                return page
+        if self._is_success_response(page):
+            return page
 
-            raise ScrapingError(url, page.status_code)
+        # TODO: logger here
+        # 2. GET request with a proxy IP (if available)
+        # TODO: implement proxy here
+
+        if self._is_success_response(page):
+            return page
+
+        # 3. GET request with a randomized user-agent and proxy (if available)
+        # from fake_useragent import UserAgent
+
+        with requests.Session() as session:
+            # TODO: add proxy here as well
+            page = session.get(url, headers={"User-Agent": UserAgent().random})
+
+        if self._is_success_response(page):
+            return page
+
+        # 4. Browser automation (Selenium, puppeteer)
+        # TODO: implement scrape with browser automation
+        # TODO: form a requests.Response
+
+        raise ScrapingError(url, page.status_code)
+
+    def _is_success_response(self, resp: Response) -> bool:
+        """
+        Validates if the passed object is a requests.Response and
+        has a valid status code.
+        """
+
+        if not isinstance(resp, Response):
+            return False
+
+        if not self._is_success_code(resp.status_code):
+            return False
+
+        return True
 
     @staticmethod
     def _is_success_code(code: int) -> bool:
@@ -98,13 +127,4 @@ class ScrapingError(Exception):
     def __init__(self, url: str, st_code: int):
         """init function"""
         self.message = f"Couldn't scrape {url}. Status code: {st_code}"
-        super().__init__(self.message)
-
-
-class ScrapingConnError(Exception):
-    """Definition for a new type of error when connection fails"""
-
-    def __init__(self, url: str):
-        """init function"""
-        self.message = f"Connection to {url} failed"
         super().__init__(self.message)

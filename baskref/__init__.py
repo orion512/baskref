@@ -4,8 +4,10 @@ Imports all teh functions from the files in this package
 Author: Dominik Zulovec Sajovic - August 2022
 """
 
+import sys
 import os
 import argparse
+import logging
 from typing import List, Callable, Dict
 from datetime import date
 
@@ -20,9 +22,18 @@ from baskref.data_collection import (
 
 from baskref.data_saving.file_saver import save_file_from_list
 
+logger = logging.getLogger(__name__)
+
 
 def run_baskref() -> None:
     """Entry point script which runs baskref"""
+
+    logging.basicConfig(
+        stream=sys.stdout,
+        level=os.getenv("LOG_LEVEL", "INFO"),
+        format="""[%(asctime)s]\t%(levelname)s\t"""
+        """%(name)s:%(lineno)d\t%(message)s""",
+    )
 
     parser = argparse.ArgumentParser()
 
@@ -133,7 +144,7 @@ def main(args: argparse.Namespace) -> None:
 def run_data_collection_manager(settings: Settings) -> List:
     """This function runs the selected mode of collection"""
 
-    settings.logger.info("Started the data collection manager")
+    logger.info("Started the data collection manager")
 
     collection_modes: Dict[str, Callable] = {
         "g": run_daily_game_collector,
@@ -158,18 +169,18 @@ def run_daily_game_collector(settings: Settings) -> List:
     a specific day.
     """
 
-    settings.logger.info("DAILY GAME COLLECTOR MODE")
-    settings.logger.info(f"Collecting all games for: {settings.in_line.date}")
+    logger.info("DAILY GAME COLLECTOR MODE")
+    logger.info(f"Collecting all games for: {settings.in_line.date}")
 
     # 1. Get all the game urls for the specific day
     url_scraper = BaskRefUrlScraper()
     game_urls = url_scraper.get_game_urls_day(settings.in_line.date)
-    settings.logger.info(f"Scraped {len(game_urls)} game urls")
+    logger.info(f"Scraped {len(game_urls)} game urls")
 
     # 2. Get the game data for the list of games
     data_scraper = BaskRefDataScraper()
     game_data = data_scraper.get_games_data(game_urls)
-    settings.logger.info(f"Scraped {len(game_data)} games")
+    logger.info(f"Scraped {len(game_data)} games")
 
     return game_data
 
@@ -187,18 +198,18 @@ def run_player_collector():
 def run_season_games_collector(settings: Settings) -> List:
     """Orchestrates the collection of all games in a season"""
 
-    settings.logger.info("SEASON GAME COLLECTOR MODE")
-    settings.logger.info(f"Collecting all games for: {settings.in_line.year}")
+    logger.info("SEASON GAME COLLECTOR MODE")
+    logger.info(f"Collecting all games for: {settings.in_line.year}")
 
     # 1. Get all the game urls for the specific year
     url_scraper = BaskRefUrlScraper()
     game_urls = url_scraper.get_game_urls_year(settings.in_line.year)
-    settings.logger.info(f"Scraped {len(game_urls)} game urls")
+    logger.info(f"Scraped {len(game_urls)} game urls")
 
     # 2. Get the game data for the list of games
     data_scraper = BaskRefDataScraper()
     game_data = data_scraper.get_games_data(game_urls)
-    settings.logger.info(f"Scraped {len(game_data)} games")
+    logger.info(f"Scraped {len(game_data)} games")
 
     return game_data
 
@@ -206,20 +217,18 @@ def run_season_games_collector(settings: Settings) -> List:
 def run_playoffs_game_collector(settings: Settings) -> List:
     """Orchestrates the collection of all games in a playoff"""
 
-    settings.logger.info("PLAYOFF GAME COLLECTOR MODE")
-    settings.logger.info(
-        f"Collecting all games for: {settings.in_line.year} playoffs"
-    )
+    logger.info("PLAYOFF GAME COLLECTOR MODE")
+    logger.info(f"Collecting all games for: {settings.in_line.year} playoffs")
 
     # 1. Get all the game urls for the specific postseason
     url_scraper = BaskRefUrlScraper()
     game_urls = url_scraper.get_game_urls_playoffs(settings.in_line.year)
-    settings.logger.info(f"Scraped {len(game_urls)} game urls")
+    logger.info(f"Scraped {len(game_urls)} game urls")
 
     # 2. Get the game data for the list of games
     data_scraper = BaskRefDataScraper()
     game_data = data_scraper.get_games_data(game_urls)
-    settings.logger.info(f"Scraped {len(game_data)} games")
+    logger.info(f"Scraped {len(game_data)} games")
 
     return game_data
 
@@ -243,4 +252,4 @@ def run_data_saving_manager(settings: Settings, coll_data: list) -> None:
 
     save_path = os.path.join(settings.in_line.file_path, file_name)
     save_file_from_list(coll_data, save_path)
-    settings.logger.info(f"Saved the file to: {save_path}")
+    logger.info(f"Saved the file to: {save_path}")

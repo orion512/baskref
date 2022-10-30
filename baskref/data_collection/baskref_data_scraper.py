@@ -5,12 +5,15 @@ from basketball reference websites.
 Author: Dominik Zulovec Sajovic, May 2022
 """
 
+import logging
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Tuple, Optional, Dict, Union
 from urllib import parse
-from requests_html import HTMLResponse
+from bs4 import BeautifulSoup
 import baskref.data_collection.html_scraper as scr
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -47,7 +50,7 @@ class BaskRefDataScraper(scr.HTMLScraper):
 
     ## parsing functions
 
-    def _parse_full_game_data(self, game_page: HTMLResponse) -> dict:
+    def _parse_full_game_data(self, game_page: BeautifulSoup) -> dict:
         """
         Scrapes the data for the given game web page.
         :game_url: a Basketball Reference URL to a game page
@@ -95,7 +98,7 @@ class BaskRefDataScraper(scr.HTMLScraper):
         }
 
     def _parse_team_name(
-        self, html: HTMLResponse, team: str
+        self, html: BeautifulSoup, team: str
     ) -> Tuple[str, str]:
         """
         Provided the BR game page and the team parameter it parses out
@@ -109,16 +112,15 @@ class BaskRefDataScraper(scr.HTMLScraper):
 
         team_idx = 1 if team == "home" else 2
 
-        team_anchor = html.html.find(
+        team_anchor = html.select_one(
             f"#content > div.scorebox > div:nth-child({team_idx}) "
-            "> div:nth-child(1) > strong > a",
-            first=True,
+            "> div:nth-child(1) > strong > a"
         )
 
         return team_anchor.text, team_anchor.attrs["href"].split("/")[2]
 
     def _parse_game_meta_data(
-        self, html: HTMLResponse
+        self, html: BeautifulSoup
     ) -> Tuple[datetime, str]:
         """
         Provided the BR game page it parses out the game time and
@@ -126,30 +128,35 @@ class BaskRefDataScraper(scr.HTMLScraper):
         :return: Tuple(time of game start, name of the arena)
         """
 
-        meta_holder = html.html.find("div.scorebox_meta", first=True)
+        meta_holder = html.select_one("div.scorebox_meta")
         game_time = datetime.strptime(
-            meta_holder.find("div")[1].text, "%I:%M %p, %B %d, %Y"
+            meta_holder.find("div").text, "%I:%M %p, %B %d, %Y"
         )
-        arena_name = meta_holder.find("div")[2].text.split(",")[0]
+        arena_name = meta_holder.find_all("div")[1].text.split(",")[0]
 
         return game_time, arena_name
 
-    def _parse_attendance(self, html: HTMLResponse) -> Optional[int]:
+    def _parse_attendance(self, html: BeautifulSoup) -> Optional[int]:
         """
         Provided the BR game page it parses out the game attendance.
         Sometimes the page doesn't include attendance in which case the
-        method return None.
+        method returns None.
         :return: attendance as an integer
         """
 
         if "Attendance" not in html.text:
             return None
 
-        attendance_text = html.text[
-            html.text.index("Attendance") : html.text.index("Attendance") + 35
+        cont = str(html.text.encode("ascii", "replace"))
+
+        attendance_text = cont[
+            cont.index("Attendance") : cont.index("Attendance") + 20
         ]
 
         digits = [s for s in attendance_text if s.isdigit()]
+
+        if len(digits) == 0:
+            return None
 
         return int("".join(digits))
 
@@ -164,7 +171,7 @@ class BaskRefDataScraper(scr.HTMLScraper):
         )
 
     def _parse_basic_stats(
-        self, page: HTMLResponse, team: str, team_sn: str
+        self, page: BeautifulSoup, team: str, team_sn: str
     ) -> Dict[str, Union[int, float]]:
         """
         Provided the BR game page it parses out the basic stats
@@ -176,64 +183,40 @@ class BaskRefDataScraper(scr.HTMLScraper):
 
         table_finder = f"#box-{team_sn.upper()}-game-basic"
 
-        table = self.simple_parse(page.html, table_finder, txt=False)
-        tb_foot = self.simple_parse(table, "tfoot", txt=False)
+        table = page.select_one(table_finder)
+        tb_foot = table.select_one("tfoot")
 
         game_dic = {
-            f"{team}_fg": int(self.simple_parse(tb_foot, "td[data-stat=fg]")),
-            f"{team}_fga": int(
-                self.simple_parse(tb_foot, "td[data-stat=fga]")
-            ),
+            f"{team}_fg": int(tb_foot.select_one("td[data-stat=fg]").text),
+            f"{team}_fga": int(tb_foot.select_one("td[data-stat=fga]").text),
             f"{team}_fg_pct": float(
-                self.simple_parse(tb_foot, "td[data-stat=fg_pct]")
+                tb_foot.select_one("td[data-stat=fg_pct]").text
             ),
-            f"{team}_fg3": int(
-                self.simple_parse(tb_foot, "td[data-stat=fg3]")
-            ),
-            f"{team}_fg3a": int(
-                self.simple_parse(tb_foot, "td[data-stat=fg3a]")
-            ),
+            f"{team}_fg3": int(tb_foot.select_one("td[data-stat=fg3]").text),
+            f"{team}_fg3a": int(tb_foot.select_one("td[data-stat=fg3a]").text),
             f"{team}_fg3_pct": float(
-                self.simple_parse(tb_foot, "td[data-stat=fg3_pct]")
+                tb_foot.select_one("td[data-stat=fg3_pct]").text
             ),
-            f"{team}_ft": int(self.simple_parse(tb_foot, "td[data-stat=ft]")),
-            f"{team}_fta": int(
-                self.simple_parse(tb_foot, "td[data-stat=fta]")
-            ),
+            f"{team}_ft": int(tb_foot.select_one("td[data-stat=ft]").text),
+            f"{team}_fta": int(tb_foot.select_one("td[data-stat=fta]").text),
             f"{team}_ft_pct": float(
-                self.simple_parse(tb_foot, "td[data-stat=ft_pct]")
+                tb_foot.select_one("td[data-stat=ft_pct]").text
             ),
-            f"{team}_orb": int(
-                self.simple_parse(tb_foot, "td[data-stat=orb]")
-            ),
-            f"{team}_drb": int(
-                self.simple_parse(tb_foot, "td[data-stat=drb]")
-            ),
-            f"{team}_trb": int(
-                self.simple_parse(tb_foot, "td[data-stat=trb]")
-            ),
-            f"{team}_ast": int(
-                self.simple_parse(tb_foot, "td[data-stat=ast]")
-            ),
-            f"{team}_stl": int(
-                self.simple_parse(tb_foot, "td[data-stat=stl]")
-            ),
-            f"{team}_blk": int(
-                self.simple_parse(tb_foot, "td[data-stat=blk]")
-            ),
-            f"{team}_tov": int(
-                self.simple_parse(tb_foot, "td[data-stat=tov]")
-            ),
-            f"{team}_pf": int(self.simple_parse(tb_foot, "td[data-stat=pf]")),
-            f"{team}_pts": int(
-                self.simple_parse(tb_foot, "td[data-stat=pts]")
-            ),
+            f"{team}_orb": int(tb_foot.select_one("td[data-stat=orb]").text),
+            f"{team}_drb": int(tb_foot.select_one("td[data-stat=drb]").text),
+            f"{team}_trb": int(tb_foot.select_one("td[data-stat=trb]").text),
+            f"{team}_ast": int(tb_foot.select_one("td[data-stat=ast]").text),
+            f"{team}_stl": int(tb_foot.select_one("td[data-stat=stl]").text),
+            f"{team}_blk": int(tb_foot.select_one("td[data-stat=blk]").text),
+            f"{team}_tov": int(tb_foot.select_one("td[data-stat=tov]").text),
+            f"{team}_pf": int(tb_foot.select_one("td[data-stat=pf]").text),
+            f"{team}_pts": int(tb_foot.select_one("td[data-stat=pts]").text),
         }
 
         return game_dic
 
     def _parse_advanced_stats(
-        self, page: HTMLResponse, team: str, team_sn: str
+        self, page: BeautifulSoup, team: str, team_sn: str
     ) -> Dict[str, Union[int, float]]:
         """
         Provided the BR game page it parses out the advanced stats
@@ -245,48 +228,48 @@ class BaskRefDataScraper(scr.HTMLScraper):
 
         table_finder = f"#box-{team_sn.upper()}-game-advanced"
 
-        table = self.simple_parse(page.html, table_finder, txt=False)
-        tb_foot = self.simple_parse(table, "tfoot", txt=False)
+        table = page.select_one(table_finder)
+        tb_foot = table.select_one("tfoot")
 
         game_dic = {
             f"{team}_ts_pct": float(
-                self.simple_parse(tb_foot, "td[data-stat=ts_pct]")
+                tb_foot.select_one("td[data-stat=ts_pct]").text
             ),
             f"{team}_efg_pct": float(
-                self.simple_parse(tb_foot, "td[data-stat=efg_pct]")
+                tb_foot.select_one("td[data-stat=efg_pct]").text
             ),
             f"{team}_fg3a_per_fga_pct": float(
-                self.simple_parse(tb_foot, "td[data-stat=fg3a_per_fga_pct]")
+                tb_foot.select_one("td[data-stat=fg3a_per_fga_pct]").text
             ),
             f"{team}_fta_per_fga_pct": float(
-                self.simple_parse(tb_foot, "td[data-stat=fta_per_fga_pct]")
+                tb_foot.select_one("td[data-stat=fta_per_fga_pct]").text
             ),
             f"{team}_orb_pct": float(
-                self.simple_parse(tb_foot, "td[data-stat=orb_pct]")
+                tb_foot.select_one("td[data-stat=orb_pct]").text
             ),
             f"{team}_drb_pct": float(
-                self.simple_parse(tb_foot, "td[data-stat=drb_pct]")
+                tb_foot.select_one("td[data-stat=drb_pct]").text
             ),
             f"{team}_trb_pct": float(
-                self.simple_parse(tb_foot, "td[data-stat=trb_pct]")
+                tb_foot.select_one("td[data-stat=trb_pct]").text
             ),
             f"{team}_ast_pct": float(
-                self.simple_parse(tb_foot, "td[data-stat=ast_pct]")
+                tb_foot.select_one("td[data-stat=ast_pct]").text
             ),
             f"{team}_stl_pct": float(
-                self.simple_parse(tb_foot, "td[data-stat=stl_pct]")
+                tb_foot.select_one("td[data-stat=stl_pct]").text
             ),
             f"{team}_blk_pct": float(
-                self.simple_parse(tb_foot, "td[data-stat=blk_pct]")
+                tb_foot.select_one("td[data-stat=blk_pct]").text
             ),
             f"{team}_tov_pct": float(
-                self.simple_parse(tb_foot, "td[data-stat=tov_pct]")
+                tb_foot.select_one("td[data-stat=tov_pct]").text
             ),
             f"{team}_off_rtg": float(
-                self.simple_parse(tb_foot, "td[data-stat=off_rtg]")
+                tb_foot.select_one("td[data-stat=off_rtg]").text
             ),
             f"{team}_def_rtg": float(
-                self.simple_parse(tb_foot, "td[data-stat=def_rtg]")
+                tb_foot.select_one("td[data-stat=def_rtg]").text
             ),
         }
 

@@ -4,6 +4,7 @@ Util function for the whole package.
 Author: Dominik Zulovec Sajovic, May 2022
 """
 
+
 from datetime import datetime, date
 from argparse import ArgumentTypeError
 

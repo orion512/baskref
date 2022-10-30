@@ -17,7 +17,7 @@ Author: Dominik Zulovec Sajovic, September 2022
 from dataclasses import dataclass
 from datetime import date
 from urllib import parse
-from requests_html import HTMLResponse
+from bs4 import BeautifulSoup
 import baskref.data_collection.html_scraper as scr
 
 
@@ -118,7 +118,7 @@ class BaskRefUrlScraper(scr.HTMLScraper):
 
     ## parsing functions
 
-    def _parse_daily_games(self, daily_games_page: HTMLResponse) -> list:
+    def _parse_daily_games(self, daily_games_page: BeautifulSoup) -> list:
         """
         Parses the games out of the html containing daily games.
         :game_date: A game_date to scrape games on
@@ -128,15 +128,15 @@ class BaskRefUrlScraper(scr.HTMLScraper):
         element_finder = "div.game_summary > p.links"
         game_urls = []
 
-        for p in daily_games_page.html.find(element_finder):
-            anch = p.find("a", first=True)
+        for p in daily_games_page.select(element_finder):
+            anch = p.find("a")
             if anch is not None:
                 url = anch.attrs["href"]
-                game_urls.append(self.base_url + url)
+                game_urls.append(self.base_url + url)  #
 
         return game_urls
 
-    def _parse_months_in_year(self, yearly_page: HTMLResponse) -> list:
+    def _parse_months_in_year(self, yearly_page: BeautifulSoup) -> list:
         """
         Parses the month urls out of the html containing monthly urls.
         :game_date: A game_date to scrape games on
@@ -145,10 +145,10 @@ class BaskRefUrlScraper(scr.HTMLScraper):
 
         return [
             self.base_url + a.attrs["href"]
-            for a in yearly_page.html.find("div.filter > div > a")
+            for a in yearly_page.select("div.filter > div > a")
         ]
 
-    def _parse_monthly_games(self, monthly_games_page: HTMLResponse) -> list:
+    def _parse_monthly_games(self, monthly_games_page: BeautifulSoup) -> list:
         """
         Parses the games out of the html containing monthly games.
         :game_date: A game_date to scrape games on
@@ -158,10 +158,10 @@ class BaskRefUrlScraper(scr.HTMLScraper):
         element_finder = 'td[data-stat="box_score_text"]'
         game_urls = []
 
-        for td in monthly_games_page.html.find(element_finder):
-            anch = td.find("a", first=True)
+        for td in monthly_games_page.select(element_finder):
+            anch = td.find("a")
             if anch is not None:
-                url = anch.find("a", first=True).attrs["href"]
+                url = anch.attrs["href"]
                 game_urls.append(self.base_url + url)
 
         return game_urls
