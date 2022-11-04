@@ -62,7 +62,9 @@ class TestScraper:
     @pytest.mark.parametrize(
         "code, expected_status, raise_err", test_get_pages_raise
     )
-    def test_get_page_raise(self, req_mock, code, expected_status, raise_err):
+    def test_get_page_logic_raise(
+        self, req_mock, code, expected_status, raise_err
+    ):
         """Tests the function get_page."""
 
         req_mock.return_value = self._generate_response("<div>ok</div>", code)
@@ -70,7 +72,7 @@ class TestScraper:
         scp = HTMLScraper()
 
         with pytest.raises(raise_err.expected_exception):
-            returned_status = scp.get_page("https://fake.url")
+            returned_status = scp.get_page_logic("https://fake.url")
             assert expected_status == returned_status
 
     test_succ_codes: list[tuple] = [

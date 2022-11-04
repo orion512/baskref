@@ -7,18 +7,20 @@ Author: Dominik Zulovec Sajovic, September 2022
 
 from typing import Callable, Any
 from dataclasses import dataclass
+import logging
 import requests
 from requests import Response
 from bs4 import BeautifulSoup
 from fake_useragent import UserAgent
 
-
-#### I have a jupyter noebook in baskref_db project!!!!!!!!!!!!!!!!!!!!!!!
+logger = logging.getLogger(__name__)
 
 
 @dataclass
 class HTMLScraper:
     """Class for scraping the web"""
+
+    proxy: str | None = None
 
     def scrape(self, url: str, parser_fun: Callable) -> Any:
         """
@@ -27,7 +29,7 @@ class HTMLScraper:
         the provided function to parse out the wanted data.
         """
 
-        page = self.get_page(url)
+        page = self.get_page_logic(url)
         soup = BeautifulSoup(page.text, "html.parser")
         return parser_fun(soup)
 
@@ -43,14 +45,35 @@ class HTMLScraper:
 
         return parser_fun(html)
 
-    def get_page(self, url: str) -> Response:
+    def get_page(
+        self, url: str, proxies: dict = None, rand_agent: bool = False
+    ) -> Response:
+        """
+        This function uses as GET request wuth a few optional parameters
+        to scrapes a static webpage from the web.
+        """
+
+        headers = {"User-Agent": UserAgent().random} if rand_agent else None
+
+        with requests.Session() as session:
+            page = session.get(url, proxies=proxies, headers=headers)
+
+        return page
+
+    def get_page_browser(self, url: str, proxies: dict = None) -> Response:
+        """
+        This function uses a browser aurtomation tool to navigate to the
+        specified url and pull the html code.
+        """
+
+    def get_page_logic(self, url: str) -> Response:
         """
         This function scrapes a static webpage from the web.
         It implements a strategy to avoid blocking by the host website.
+        All requests use a proxy if specified.
         1. Normal GET request
-        2. GET request with a proxy IP (if available)
-        3. GET request with a randomized user-agent
-        4. Browser automation (Selenium)
+        2. GET request with a randomized user-agent
+        3. Browser automation (Selenium, pypeteer)
 
         If the response status code is ok (200-300)
         the function returns a Response object.
@@ -58,31 +81,25 @@ class HTMLScraper:
         """
 
         # 1. Normal GET request
-        with requests.Session() as session:
-            page = session.get(url)
+        page = self.get_page(url, proxies=self._proxies())
 
         if self._is_success_response(page):
             return page
 
-        # TODO: logger here
-        # 2. GET request with a proxy IP (if available)
-        # TODO: implement proxy here
+        logger.info(f"[1] Normal scrape failed ({page.status_code})")
+        logger.info(f"\t Proxy used: {self.proxy}")
+
+        # 2. GET request with a randomized user-agent
+        page = self.get_page(url, proxies=self._proxies(), rand_agent=True)
 
         if self._is_success_response(page):
             return page
 
-        # 3. GET request with a randomized user-agent and proxy (if available)
-        # from fake_useragent import UserAgent
+        logger.info(f"[2] Random UA scrape failed ({page.status_code})")
+        logger.info(f"\t Proxy used: {self.proxy}")
 
-        with requests.Session() as session:
-            # TODO: add proxy here as well
-            page = session.get(url, headers={"User-Agent": UserAgent().random})
-
-        if self._is_success_response(page):
-            return page
-
-        # 4. Browser automation (Selenium, puppeteer)
-        # TODO: implement scrape with browser automation
+        # 3. Browser automation (Selenium, puppeteer)
+        # TODO: self.get_page_browser(url)
         # TODO: form a requests.Response
 
         raise ScrapingError(url, page.status_code)
@@ -115,6 +132,15 @@ class HTMLScraper:
             raise ValueError("The status code has to be an integer!")
 
         return 200 <= code < 300
+
+    def _proxies(self) -> dict | None:
+        """If a proxy is passed"""
+        if self.proxy:
+            return {
+                "https": self.proxy,
+                "http": self.proxy,
+            }
+        return None
 
 
 class ScrapingError(Exception):

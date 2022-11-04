@@ -16,6 +16,7 @@ class InLine:
     namechar: str
     year: int
     file_path: str
+    proxy: str
 
 
 @dataclass

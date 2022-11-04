@@ -113,6 +113,16 @@ def run_baskref() -> None:
         type=str,
     )
 
+    parser.add_argument(
+        "-p",
+        "--proxy",
+        help="""
+        This parameter specifies the proxy to be used when sending requests.
+        """,
+        default=None,
+        type=str,
+    )
+
     parameters = parser.parse_args()
 
     main(parameters)
@@ -127,6 +137,7 @@ def main(args: argparse.Namespace) -> None:
         namechar=args.namechar,
         year=args.year,
         file_path=args.file_path,
+        proxy=args.proxy,
     )
 
     settings = Settings(in_line=in_line)
@@ -173,12 +184,12 @@ def run_daily_game_collector(settings: Settings) -> List:
     logger.info(f"Collecting all games for: {settings.in_line.date}")
 
     # 1. Get all the game urls for the specific day
-    url_scraper = BaskRefUrlScraper()
+    url_scraper = BaskRefUrlScraper(settings.in_line.proxy)
     game_urls = url_scraper.get_game_urls_day(settings.in_line.date)
     logger.info(f"Scraped {len(game_urls)} game urls")
 
     # 2. Get the game data for the list of games
-    data_scraper = BaskRefDataScraper()
+    data_scraper = BaskRefDataScraper(settings.in_line.proxy)
     game_data = data_scraper.get_games_data(game_urls)
     logger.info(f"Scraped {len(game_data)} games")
 
@@ -202,12 +213,12 @@ def run_season_games_collector(settings: Settings) -> List:
     logger.info(f"Collecting all games for: {settings.in_line.year}")
 
     # 1. Get all the game urls for the specific year
-    url_scraper = BaskRefUrlScraper()
+    url_scraper = BaskRefUrlScraper(settings.in_line.proxy)
     game_urls = url_scraper.get_game_urls_year(settings.in_line.year)
     logger.info(f"Scraped {len(game_urls)} game urls")
 
     # 2. Get the game data for the list of games
-    data_scraper = BaskRefDataScraper()
+    data_scraper = BaskRefDataScraper(settings.in_line.proxy)
     game_data = data_scraper.get_games_data(game_urls)
     logger.info(f"Scraped {len(game_data)} games")
 
@@ -221,12 +232,12 @@ def run_playoffs_game_collector(settings: Settings) -> List:
     logger.info(f"Collecting all games for: {settings.in_line.year} playoffs")
 
     # 1. Get all the game urls for the specific postseason
-    url_scraper = BaskRefUrlScraper()
+    url_scraper = BaskRefUrlScraper(settings.in_line.proxy)
     game_urls = url_scraper.get_game_urls_playoffs(settings.in_line.year)
     logger.info(f"Scraped {len(game_urls)} game urls")
 
     # 2. Get the game data for the list of games
-    data_scraper = BaskRefDataScraper()
+    data_scraper = BaskRefDataScraper(settings.in_line.proxy)
     game_data = data_scraper.get_games_data(game_urls)
     logger.info(f"Scraped {len(game_data)} games")
 
