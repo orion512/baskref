@@ -145,6 +145,7 @@ the configuration for pylint is stored in .pylintrc file.
 ```bash 
 # run pylint over the entire code base
 pylint baskref
+pylint --recursive=y ./
 ```
 
 ### MyPy

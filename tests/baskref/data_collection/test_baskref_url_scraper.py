@@ -49,7 +49,7 @@ class TestBaskRefUrlScraper:
     ):
         """Tests the function generate_season_games_url."""
 
-        br_scraper = BaskRefUrlScraper(input_url)
+        br_scraper = BaskRefUrlScraper(base_url=input_url)
 
         returned_status = br_scraper._generate_season_games_url(input_year)
         assert expected_status == returned_status
@@ -95,7 +95,7 @@ class TestBaskRefUrlScraper:
     ):
         """Tests the function scrape_game_urls_day."""
 
-        br_scraper = BaskRefUrlScraper(input_url)
+        br_scraper = BaskRefUrlScraper(base_url=input_url)
 
         returned_status = br_scraper._generate_daily_games_url(game_date)
         assert expected_status == returned_status
