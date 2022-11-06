@@ -8,7 +8,7 @@ import sys
 import os
 import argparse
 import logging
-from typing import List, Callable, Dict
+from typing import Callable
 from datetime import date
 
 from baskref.settings import Settings, InLine
@@ -152,12 +152,12 @@ def main(args: argparse.Namespace) -> None:
 ## Data Collection Functions
 
 
-def run_data_collection_manager(settings: Settings) -> List:
+def run_data_collection_manager(settings: Settings) -> list:
     """This function runs the selected mode of collection"""
 
     logger.info("Started the data collection manager")
 
-    collection_modes: Dict[str, Callable] = {
+    collection_modes: dict[str, Callable] = {
         "g": run_daily_game_collector,
         "t": run_team_collector,
         "p": run_player_collector,
@@ -174,7 +174,7 @@ def run_data_collection_manager(settings: Settings) -> List:
     return collection_modes[settings.in_line.type](settings)
 
 
-def run_daily_game_collector(settings: Settings) -> List:
+def run_daily_game_collector(settings: Settings) -> list:
     """
     This function orchestrates the collection of NBA games on
     a specific day.
@@ -206,7 +206,7 @@ def run_player_collector():
     raise NotImplementedError
 
 
-def run_season_games_collector(settings: Settings) -> List:
+def run_season_games_collector(settings: Settings) -> list:
     """Orchestrates the collection of all games in a season"""
 
     logger.info("SEASON GAME COLLECTOR MODE")
@@ -225,7 +225,7 @@ def run_season_games_collector(settings: Settings) -> List:
     return game_data
 
 
-def run_playoffs_game_collector(settings: Settings) -> List:
+def run_playoffs_game_collector(settings: Settings) -> list:
     """Orchestrates the collection of all games in a playoff"""
 
     logger.info("PLAYOFF GAME COLLECTOR MODE")
@@ -250,7 +250,7 @@ def run_playoffs_game_collector(settings: Settings) -> List:
 def run_data_saving_manager(settings: Settings, coll_data: list) -> None:
     """Integration function which runs the saving of the data"""
 
-    saving_prefix_options: Dict[str, str] = {
+    saving_prefix_options: dict[str, str] = {
         "g": settings.in_line.date.strftime("%Y%m%d"),
         "t": "teams",
         "p": settings.in_line.namechar,

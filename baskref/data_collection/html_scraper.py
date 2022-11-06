@@ -5,9 +5,9 @@ Author: Dominik Zulovec Sajovic, September 2022
 """
 
 
-from typing import Callable, Any
 from dataclasses import dataclass
 import logging
+from typing import Callable, Any
 import requests
 from requests import Response
 from bs4 import BeautifulSoup

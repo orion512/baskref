@@ -1,10 +1,13 @@
 [build-system]
-requires = ["setuptools~=62.6", "wheel~=0.37.1"]
+requires = [
+  "setuptools",
+  "wheel",
+  ]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "baskref"
-version = "0.0.1"
+version = "0.0.2"
 authors = [
   {name="Dominik Zulovec Sajovic", email="dominik.zsajovic@gmail.com"},
 ]
@@ -12,26 +15,29 @@ keywords = ["basketball", "web scraper", "python"]
 description = "baskRef is a tool to scrape basketball Data from the web."
 readme = "README.md"
 license = {file="LICENSE"}
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "requests_html==0.10.0",
+  "requests==2.28.1",
+  "beautifulsoup4==4.11.1",
+  "fake_useragent==0.1.11",
 ]
 
 [project.urls]
 "Homepage" = "https://github.com/orion512/basketball_scraper"
 "Bug Tracker" = "https://github.com/orion512/basketball_scraper/issues"
+"Project Board" = "https://github.com/users/orion512/projects/2/views/1"
 
 [project.scripts]
 baskref = "baskref:run_baskref"
 
 [tool.black]
 line-length = 79
-target-version = ['py38']
+target-version = ['py310']
 exclude = '''
 /(
   \.toml
@@ -42,6 +48,10 @@ exclude = '''
   |scripts
 )/
 '''
+
+[tool.setuptools.packages.find]
+include = ["baskref"]
+exclude = ["notebooks*"]
 
 [tool.mypy]
 ignore_missing_imports = true
