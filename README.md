@@ -56,6 +56,11 @@ baskref -t gp -y 2006 -fp datasets
 # python -c "from baskref import run_baskref; run_baskref()" -t gp -y 2006 -fp datasets
 ```
 
+Use proxy for scraping.
+```bash
+baskref -t g -d 2022-01-07 -fp datasets -p http://someproxy.com
+```
+
 ## How to Use the Package?
 
 Install requirements
@@ -76,6 +81,10 @@ from baskref.data_collection import (
 
 url_scraper = BaskRefUrlScraper()
 data_scraper = BaskRefDataScraper()
+
+# optionally you can set a proxy
+proxy_url_scraper = BaskRefUrlScraper("http://someproxy.com")
+proxy_data_scraper = BaskRefDataScraper("http://someproxy.com")
 ```
 The BaskRefDataScraper.get_games_data returns a list of dictionaries.
 
@@ -144,7 +153,6 @@ the configuration for pylint is stored in .pylintrc file.
 
 ```bash 
 # run pylint over the entire code base
-pylint baskref
 pylint --recursive=y ./
 ```
 
@@ -154,7 +162,7 @@ the configuration for mypy is stored in pyproject.toml file.
 
 ```bash 
 # run mypy over the entire code base
-mypy .
+mypy baskref
 ```
 
 ## Bonus
@@ -189,12 +197,42 @@ deactivate
 
 ```
 pip install -r requirements_dev.txt
+
+# uninstall all packages Windows
+pip freeze > unins && pip uninstall -y -r unins && del unins
+
+# uninstall all packages linux
+pip freeze | xargs pip uninstall -y
 ```
 
 3. Install the pre-commit hook
 ```
 pre-commit install
 ```
+
+### Prepare a new Version
+This section describes some of the steps when preparing a new baskref version.
+
+- adjust the pyproject.toml file
+    - version
+    - dependencies
+- install project locally and test it
+```
+python -m build
+pip install .
+```
+- publish project to test.pypi
+```
+pip install --upgrade twine
+twine upload --repository testpypi dist/*
+# install from test.pypi
+pip install --index-url https://test.pypi.org/simple/ baskref
+```
+- publish a new version
+```
+twine upload dist/*
+```
+
 
 ## Contributors
 

@@ -8,7 +8,6 @@ Author: Dominik Zulovec Sajovic, May 2022
 import logging
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Tuple, Optional, Dict, Union
 from urllib import parse
 from bs4 import BeautifulSoup
 import baskref.data_collection.html_scraper as scr
@@ -99,7 +98,7 @@ class BaskRefDataScraper(scr.HTMLScraper):
 
     def _parse_team_name(
         self, html: BeautifulSoup, team: str
-    ) -> Tuple[str, str]:
+    ) -> tuple[str, str]:
         """
         Provided the BR game page and the team parameter it parses out
         the team short and long names.
@@ -121,7 +120,7 @@ class BaskRefDataScraper(scr.HTMLScraper):
 
     def _parse_game_meta_data(
         self, html: BeautifulSoup
-    ) -> Tuple[datetime, str]:
+    ) -> tuple[datetime, str]:
         """
         Provided the BR game page it parses out the game time and
         game arena name.
@@ -136,7 +135,7 @@ class BaskRefDataScraper(scr.HTMLScraper):
 
         return game_time, arena_name
 
-    def _parse_attendance(self, html: BeautifulSoup) -> Optional[int]:
+    def _parse_attendance(self, html: BeautifulSoup) -> int | None:
         """
         Provided the BR game page it parses out the game attendance.
         Sometimes the page doesn't include attendance in which case the
@@ -172,7 +171,7 @@ class BaskRefDataScraper(scr.HTMLScraper):
 
     def _parse_basic_stats(
         self, page: BeautifulSoup, team: str, team_sn: str
-    ) -> Dict[str, Union[int, float]]:
+    ) -> dict[str, int | float]:
         """
         Provided the BR game page it parses out the basic stats
         for either the home or the road team, depending on the
@@ -217,7 +216,7 @@ class BaskRefDataScraper(scr.HTMLScraper):
 
     def _parse_advanced_stats(
         self, page: BeautifulSoup, team: str, team_sn: str
-    ) -> Dict[str, Union[int, float]]:
+    ) -> dict[str, int | float]:
         """
         Provided the BR game page it parses out the advanced stats
         for either the home or the road team, depending on the
