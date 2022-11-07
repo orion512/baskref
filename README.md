@@ -61,6 +61,13 @@ Use proxy for scraping.
 baskref -t g -d 2022-01-07 -fp datasets -p http://someproxy.com
 ```
 
+Only scrape the urls to the games.
+```bash
+# simply add "u" to any of the three scraping types:
+# g -> gu, gs -> gsu, gp -> gpu
+baskref -t gu -d 2022-01-07 -fp datasets
+```
+
 ## How to Use the Package?
 
 Install requirements
