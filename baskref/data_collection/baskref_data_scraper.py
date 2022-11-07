@@ -128,9 +128,19 @@ class BaskRefDataScraper(scr.HTMLScraper):
         """
 
         meta_holder = html.select_one("div.scorebox_meta")
-        game_time = datetime.strptime(
-            meta_holder.find("div").text, "%I:%M %p, %B %d, %Y"
-        )
+        # TODO: improve below nested try-catch
+        try:
+            game_time = datetime.strptime(
+                meta_holder.find("div").text, "%I:%M %p, %B %d, %Y"
+            )
+        except ValueError:
+            try:
+                game_time = datetime.strptime(
+                    meta_holder.find("div").text, "%B %d, %Y"
+                )
+            except ValueError:
+                game_time = datetime(1900, 1, 1)
+
         arena_name = meta_holder.find_all("div")[1].text.split(",")[0]
 
         return game_time, arena_name
