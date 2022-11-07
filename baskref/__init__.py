@@ -51,13 +51,16 @@ def run_baskref() -> None:
         help="""
         Specifcy type of scraping (
             g - for game by date,
+            gu - for game by date (only urls),
             t - for all teams,
             p - for all players,
             gs - for all games in a year,
-            gp - for all playoff games in a year
+            gsu - for all games in a year (only urls),
+            gp - for all playoff games in a year,
+            gpu - for all playoff games in a year (only urls)
         )
         """,
-        choices=["g", "t", "p", "gs", "gp"],
+        choices=["g", "gu", "t", "p", "gs", "gsu", "gp", "gpu"],
         type=str,
     )
 
@@ -159,10 +162,13 @@ def run_data_collection_manager(settings: Settings) -> list:
 
     collection_modes: dict[str, Callable] = {
         "g": run_daily_game_collector,
+        "gu": run_daily_game_collector,
         "t": run_team_collector,
         "p": run_player_collector,
         "gs": run_season_games_collector,
+        "gsu": run_season_games_collector,
         "gp": run_playoffs_game_collector,
+        "gpu": run_playoffs_game_collector,
     }
 
     if settings.in_line.type not in collection_modes:
@@ -187,6 +193,9 @@ def run_daily_game_collector(settings: Settings) -> list:
     url_scraper = BaskRefUrlScraper(settings.in_line.proxy)
     game_urls = url_scraper.get_game_urls_day(settings.in_line.date)
     logger.info(f"Scraped {len(game_urls)} game urls")
+
+    if settings.in_line.type == "gu":
+        return [{"url": url} for url in game_urls]
 
     # 2. Get the game data for the list of games
     data_scraper = BaskRefDataScraper(settings.in_line.proxy)
@@ -217,6 +226,9 @@ def run_season_games_collector(settings: Settings) -> list:
     game_urls = url_scraper.get_game_urls_year(settings.in_line.year)
     logger.info(f"Scraped {len(game_urls)} game urls")
 
+    if settings.in_line.type == "gsu":
+        return [{"url": url} for url in game_urls]
+
     # 2. Get the game data for the list of games
     data_scraper = BaskRefDataScraper(settings.in_line.proxy)
     game_data = data_scraper.get_games_data(game_urls)
@@ -236,6 +248,9 @@ def run_playoffs_game_collector(settings: Settings) -> list:
     game_urls = url_scraper.get_game_urls_playoffs(settings.in_line.year)
     logger.info(f"Scraped {len(game_urls)} game urls")
 
+    if settings.in_line.type == "gpu":
+        return [{"url": url} for url in game_urls]
+
     # 2. Get the game data for the list of games
     data_scraper = BaskRefDataScraper(settings.in_line.proxy)
     game_data = data_scraper.get_games_data(game_urls)
@@ -252,10 +267,13 @@ def run_data_saving_manager(settings: Settings, coll_data: list) -> None:
 
     saving_prefix_options: dict[str, str] = {
         "g": settings.in_line.date.strftime("%Y%m%d"),
+        "gu": settings.in_line.date.strftime("%Y%m%d"),
         "t": "teams",
         "p": settings.in_line.namechar,
         "gs": str(settings.in_line.year),
+        "gsu": str(settings.in_line.year),
         "gp": str(settings.in_line.year),
+        "gpu": str(settings.in_line.year),
     }
 
     chosen_prefix = saving_prefix_options[settings.in_line.type]
