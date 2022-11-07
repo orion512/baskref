@@ -29,7 +29,7 @@ def save_file_from_list(data: list[dict], filepath: str) -> None:
 
     # if path to file doesn't exist -> create it
     folder_path = os.path.dirname(filepath)
-    if not os.path.exists(folder_path):
+    if (not os.path.exists(folder_path)) and (folder_path != ""):
         os.makedirs(folder_path)
 
     with open(filepath, "w", newline="", encoding="UTF-8") as csv_file:
