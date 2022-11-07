@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "baskref"
-version = "0.0.2"
+version = "0.0.3"
 authors = [
   {name="Dominik Zulovec Sajovic", email="dominik.zsajovic@gmail.com"},
 ]
@@ -15,7 +15,7 @@ keywords = ["basketball", "web scraper", "python"]
 description = "baskRef is a tool to scrape basketball Data from the web."
 readme = "README.md"
 license = {file="LICENSE"}
-requires-python = ">=3.10"
+requires-python = ">=3.9"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
@@ -37,7 +37,7 @@ baskref = "baskref:run_baskref"
 
 [tool.black]
 line-length = 79
-target-version = ['py310']
+target-version = ['py39']
 exclude = '''
 /(
   \.toml
