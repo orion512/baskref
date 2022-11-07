@@ -14,14 +14,12 @@ from baskref.data_saving.file_saver import (
 
 
 root_path = os.path.abspath(
-    os.path.join(
-        __file__, os.pardir, os.pardir, os.pardir, os.pardir, os.pardir
-    )
+    os.path.join(__file__, os.pardir, os.pardir, os.pardir, os.pardir)
 )
 
 
-class TestPandasSaver:
-    """Class for pandas saver tester"""
+class TestFileSaver:
+    """Class for file saver tester"""
 
     test_all_elements_raise: list[tuple] = [
         (None, None, pytest.raises(ValueError)),
@@ -80,6 +78,10 @@ class TestPandasSaver:
             [{"009": "2022-08-09"}, {"009": "2022-28-12"}],
             os.path.join("tests", "temp", "temp.csv"),
         ),
+        (
+            [{"009": "2022-08-09"}, {"009": "2022-28-12"}],
+            os.path.join("temp.csv"),
+        ),
     ]
 
     @pytest.mark.unittest
@@ -90,7 +92,7 @@ class TestPandasSaver:
         testing_dir = os.path.dirname(file_path)
         file_name = os.path.basename(file_path)
 
-        input_file_path = os.path.join(root_path, testing_dir)
+        input_file_path = os.path.join(testing_dir)
         input_file_full_path = os.path.join(input_file_path, file_name)
 
         try:
@@ -101,7 +103,8 @@ class TestPandasSaver:
         finally:
             # Clean the results created by the function
             os.remove(input_file_full_path)
-            os.rmdir(input_file_path)
+            if testing_dir != "":
+                os.rmdir(input_file_path)
 
         assert read_data.equals(dummy_data)
 

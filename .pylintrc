@@ -1,5 +1,5 @@
 [MAIN]
-ignore=venv
+ignore=venv, build
 
 [MESSAGES CONTROL]
 disable=fixme,too-few-public-methods,logging-fstring-interpolation
