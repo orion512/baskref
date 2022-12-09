@@ -109,7 +109,7 @@ class BaskRefDataScraper(scr.HTMLScraper):
         if team not in ["home", "away"]:
             raise ValueError('The team argument can only be "home" or "away"')
 
-        team_idx = 1 if team == "home" else 2
+        team_idx = 2 if team == "home" else 1
 
         team_anchor = html.select_one(
             f"#content > div.scorebox > div:nth-child({team_idx}) "
