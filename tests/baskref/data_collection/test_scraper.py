@@ -62,9 +62,7 @@ class TestScraper:
     @pytest.mark.parametrize(
         "code, expected_status, raise_err", test_get_pages_raise
     )
-    def test_get_page_logic_raise(
-        self, req_mock, code, expected_status, raise_err
-    ):
+    def test_get_page_raise(self, req_mock, code, expected_status, raise_err):
         """Tests the function get_page."""
 
         req_mock.return_value = self._generate_response("<div>ok</div>", code)

@@ -10,7 +10,7 @@ colorama==0.4.6
 dill==0.3.6
 distlib==0.3.6
 exceptiongroup==1.0.1
-fake-useragent==0.1.11
+fake-useragent==1.1.1
 filelock==3.8.0
 identify==2.5.8
 idna==3.4
