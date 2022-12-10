@@ -7,10 +7,10 @@ Author: Dominik Zulovec Sajovic, May 2022
 
 import logging
 from dataclasses import dataclass
-from datetime import datetime
 from urllib import parse
 from bs4 import BeautifulSoup
 import baskref.data_collection.html_scraper as scr
+from baskref.utils import str_to_datetime
 
 logger = logging.getLogger(__name__)
 
@@ -61,8 +61,7 @@ class BaskRefDataScraper(scr.HTMLScraper):
         away_team_fn, away_team_sn = self._parse_team_name(game_page, "away")
 
         # game meta data
-        game_time, arena_name = self._parse_game_meta_data(game_page)
-        attendance = self._parse_attendance(game_page)
+        meta_data = self._parse_game_meta_data(game_page)
 
         # basic stats
         home_basic_dic = self._parse_basic_stats(
@@ -87,9 +86,7 @@ class BaskRefDataScraper(scr.HTMLScraper):
             "away_team": away_team_sn,
             "home_team_full_name": home_team_fn,
             "away_team_full_name": away_team_fn,
-            "game_time": game_time,
-            "arena_name": arena_name,
-            "attendance": attendance,
+            **meta_data,
             **home_basic_dic,
             **away_basic_dic,
             **home_advanced_dic,
@@ -118,32 +115,31 @@ class BaskRefDataScraper(scr.HTMLScraper):
 
         return team_anchor.text, team_anchor.attrs["href"].split("/")[2]
 
-    def _parse_game_meta_data(
-        self, html: BeautifulSoup
-    ) -> tuple[datetime, str]:
+    def _parse_game_meta_data(self, html: BeautifulSoup) -> dict:
         """
         Provided the BR game page it parses out the game time and
         game arena name.
-        :return: Tuple(time of game start, name of the arena)
+        :return: dictionary of meta data
         """
 
         meta_holder = html.select_one("div.scorebox_meta")
-        # TODO: improve below nested try-catch
-        try:
-            game_time = datetime.strptime(
-                meta_holder.find("div").text, "%I:%M %p, %B %d, %Y"
-            )
-        except ValueError:
-            try:
-                game_time = datetime.strptime(
-                    meta_holder.find("div").text, "%B %d, %Y"
-                )
-            except ValueError:
-                game_time = datetime(1900, 1, 1)
+
+        game_time = str_to_datetime(
+            meta_holder.find("div").text, ["%I:%M %p, %B %d, %Y", "%B %d, %Y"]
+        )
 
         arena_name = meta_holder.find_all("div")[1].text.split(",")[0]
 
-        return game_time, arena_name
+        playin = "play-in" in html.select_one("#content > h1").text.lower()
+
+        attendance = self._parse_attendance(html)
+
+        return {
+            "game_time": game_time,
+            "arena_name": arena_name,
+            "playin_game": playin,
+            "attendance": attendance,
+        }
 
     def _parse_attendance(self, html: BeautifulSoup) -> int | None:
         """
