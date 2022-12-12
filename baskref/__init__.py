@@ -161,14 +161,15 @@ def run_data_collection_manager(settings: Settings) -> list:
     logger.info("Started the data collection manager")
 
     collection_modes: dict[str, Callable] = {
-        "g": run_daily_game_collector,
-        "gu": run_daily_game_collector,
-        "t": run_team_collector,
-        "p": run_player_collector,
-        "gs": run_season_games_collector,
-        "gsu": run_season_games_collector,
-        "gp": run_playoffs_game_collector,
-        "gpu": run_playoffs_game_collector,
+        "g": run_daily_collector,
+        "gu": run_daily_collector,
+        "gpl": run_daily_collector,
+        "gs": run_season_collector,
+        "gsu": run_season_collector,
+        "gspl": run_season_collector,
+        "gp": run_playoffs_collector,
+        "gpu": run_playoffs_collector,
+        "gppl": run_playoffs_collector,
     }
 
     if settings.in_line.type not in collection_modes:
@@ -180,14 +181,14 @@ def run_data_collection_manager(settings: Settings) -> list:
     return collection_modes[settings.in_line.type](settings)
 
 
-def run_daily_game_collector(settings: Settings) -> list:
+def run_daily_collector(settings: Settings) -> list:
     """
-    This function orchestrates the collection of NBA games on
+    This function orchestrates the collection of data from NBA games on
     a specific day.
     """
 
     logger.info("DAILY GAME COLLECTOR MODE")
-    logger.info(f"Collecting all games for: {settings.in_line.date}")
+    logger.info(f"Collecting all game urls for: {settings.in_line.date}")
 
     # 1. Get all the game urls for the specific day
     url_scraper = BaskRefUrlScraper(settings.in_line.proxy)
@@ -199,24 +200,19 @@ def run_daily_game_collector(settings: Settings) -> list:
 
     # 2. Get the game data for the list of games
     data_scraper = BaskRefDataScraper(settings.in_line.proxy)
-    game_data = data_scraper.get_games_data(game_urls)
+
+    if settings.in_line.type == "gpl":
+        game_data = data_scraper.get_games_data(game_urls)
+    elif settings.in_line.type == "g":
+        game_data = data_scraper.get_games_data(game_urls)
+
     logger.info(f"Scraped {len(game_data)} games")
 
     return game_data
 
 
-def run_team_collector():
-    """This function orchestrates the collection of all NBA teams"""
-    raise NotImplementedError
-
-
-def run_player_collector():
-    """This function orchestrates the collection of all NBA players"""
-    raise NotImplementedError
-
-
-def run_season_games_collector(settings: Settings) -> list:
-    """Orchestrates the collection of all games in a season"""
+def run_season_collector(settings: Settings) -> list:
+    """Orchestrates the collection of data in all games of a season"""
 
     logger.info("SEASON GAME COLLECTOR MODE")
     logger.info(f"Collecting all games for: {settings.in_line.year}")
@@ -237,8 +233,8 @@ def run_season_games_collector(settings: Settings) -> list:
     return game_data
 
 
-def run_playoffs_game_collector(settings: Settings) -> list:
-    """Orchestrates the collection of all games in a playoff"""
+def run_playoffs_collector(settings: Settings) -> list:
+    """Orchestrates the collection of data in all games in a playoff"""
 
     logger.info("PLAYOFF GAME COLLECTOR MODE")
     logger.info(f"Collecting all games for: {settings.in_line.year} playoffs")
@@ -268,7 +264,6 @@ def run_data_saving_manager(settings: Settings, coll_data: list) -> None:
     saving_prefix_options: dict[str, str] = {
         "g": settings.in_line.date.strftime("%Y%m%d"),
         "gu": settings.in_line.date.strftime("%Y%m%d"),
-        "t": "teams",
         "p": settings.in_line.namechar,
         "gs": str(settings.in_line.year),
         "gsu": str(settings.in_line.year),
