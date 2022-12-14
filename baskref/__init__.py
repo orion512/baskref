@@ -52,15 +52,16 @@ def run_baskref() -> None:
         Specifcy type of scraping (
             g - for game by date,
             gu - for game by date (only urls),
-            t - for all teams,
-            p - for all players,
+            gpl - player stats by date,
             gs - for all games in a year,
             gsu - for all games in a year (only urls),
+            gspl - player stats all games in a year,
             gp - for all playoff games in a year,
             gpu - for all playoff games in a year (only urls)
+            gppl - player stats playoff games in a year
         )
         """,
-        choices=["g", "gu", "t", "p", "gs", "gsu", "gp", "gpu"],
+        choices=["g", "gu", "gpl", "gs", "gsu", "gspl", "gp", "gpu", "gppl"],
         type=str,
     )
 
@@ -202,13 +203,13 @@ def run_daily_collector(settings: Settings) -> list:
     data_scraper = BaskRefDataScraper(settings.in_line.proxy)
 
     if settings.in_line.type == "gpl":
-        game_data = data_scraper.get_games_data(game_urls)
+        data = data_scraper.get_player_stats_data(game_urls)
     elif settings.in_line.type == "g":
-        game_data = data_scraper.get_games_data(game_urls)
+        data = data_scraper.get_games_data(game_urls)
 
-    logger.info(f"Scraped {len(game_data)} games")
+    logger.info(f"Scraped data from {len(data)} games")
 
-    return game_data
+    return data
 
 
 def run_season_collector(settings: Settings) -> list:

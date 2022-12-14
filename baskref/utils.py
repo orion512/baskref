@@ -30,3 +30,19 @@ def str_to_datetime(date_str: str, formats: list[str]) -> datetime:
             pass
 
     return datetime(1900, 1, 1)
+
+
+def num(char: str | None) -> float | int | None:
+    """
+    tries to convert a string into an int and returns it.
+    If the conversion fails it tries to convert the string into a float
+    and returns it.
+    If the string is None it return None.
+    """
+    if char is None:
+        return None
+
+    try:
+        return int(char)
+    except ValueError:
+        return float(char)
