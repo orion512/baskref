@@ -7,6 +7,7 @@ Author: Dominik Zulovec Sajovic, May 2022
 
 from datetime import datetime, date
 from argparse import ArgumentTypeError
+from typing import Any
 
 
 def valid_date(str_date: str) -> date:
@@ -46,3 +47,12 @@ def num(char: str | None) -> float | int | None:
         return int(char)
     except ValueError:
         return float(char)
+
+
+def broadcast(list_dicts: list[dict], key: str, val: Any) -> list[dict]:
+    """broadcasts a value into every dictionary in a list"""
+
+    for dic in list_dicts:
+        dic[key] = val
+
+    return list_dicts

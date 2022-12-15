@@ -207,7 +207,7 @@ def run_daily_collector(settings: Settings) -> list:
     elif settings.in_line.type == "g":
         data = data_scraper.get_games_data(game_urls)
 
-    logger.info(f"Scraped data from {len(data)} games")
+    logger.info(f"Scraped {len(data)} data points")
 
     return data
 
@@ -265,11 +265,13 @@ def run_data_saving_manager(settings: Settings, coll_data: list) -> None:
     saving_prefix_options: dict[str, str] = {
         "g": settings.in_line.date.strftime("%Y%m%d"),
         "gu": settings.in_line.date.strftime("%Y%m%d"),
-        "p": settings.in_line.namechar,
+        "gpl": settings.in_line.date.strftime("%Y%m%d"),
         "gs": str(settings.in_line.year),
         "gsu": str(settings.in_line.year),
+        "gspl": str(settings.in_line.year),
         "gp": str(settings.in_line.year),
         "gpu": str(settings.in_line.year),
+        "gppl": str(settings.in_line.year),
     }
 
     chosen_prefix = saving_prefix_options[settings.in_line.type]
