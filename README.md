@@ -11,41 +11,39 @@ The data can then be saved into a csv to be used by a different utility.
 ### What data are we collecting?
 
 - games & game stats (in depth stats of the games)
-    - by day
-    - by whole season (regular + playoffs)
-    - by playoffs
+- players game stats
+
+All datasets are available to be collected:
+- by day (all games in one day)
+- by whole season (regular + playoffs)
+- by playoffs
 
 #### Future Collections (Not yet implemented)
-- teams (Not Implemented)
-- players (Not Implemented)
+- players meta data (Not Implemented)
 - game logs (Not Implemented)
-- player stats (Not Implemented)
+
 
 ## How to Install & Run the Package?
 
-Install the project
+### Install the project
 ```bash
 pip install baskref
+
+# optional set logging level. Default value is INFO
+export LOG_LEVEL=DEBUG # INFO, DEBUG, ERROR
 ```
 
-Set logging level (optional)
-```bash
-# INFO, DEBUG, ERROR
-# if not set default value is INFO
-export LOG_LEVEL=DEBUG
-```
+### Scrape Game Data
 
 Scrape all games for the 7th of January 2022.
 ```bash
 baskref -t g -d 2022-01-07 -fp datasets
-# if you don't install the package
 # python -c "from baskref import run_baskref; run_baskref()" -t g -d 2022-01-07 -fp datasets
 ```
 
 Scrape all games for the 2006 NBA season (regular season + playoffs).
 ```bash
 baskref -t gs -y 2006 -fp datasets
-# if you don't install the package
 # python -c "from baskref import run_baskref; run_baskref()" -t gs -y 2006 -fp datasets
 ```
 
@@ -56,17 +54,28 @@ baskref -t gp -y 2006 -fp datasets
 # python -c "from baskref import run_baskref; run_baskref()" -t gp -y 2006 -fp datasets
 ```
 
-Use proxy for scraping.
-```bash
-baskref -t g -d 2022-01-07 -fp datasets -p http://someproxy.com
-```
+### Scrape Game URLs only
 
-Only scrape the urls to the games.
 ```bash
 # simply add "u" to any of the three scraping types:
 # g -> gu, gs -> gsu, gp -> gpu
 baskref -t gu -d 2022-01-07 -fp datasets
 ```
+
+### Scrape Player Stats Data
+
+```bash
+# simply add "pl" to any of the three scraping types:
+# g -> gpl, gs -> gspl, gp -> gppl
+baskref -t gpl -d 2022-01-07 -fp datasets
+```
+
+### Scrape Using a Proxy
+Use proxy for scraping.
+```bash
+baskref -t g -d 2022-01-07 -fp datasets -p http://someproxy.com
+```
+
 
 ## How to Use the Package?
 
@@ -113,6 +122,14 @@ Collect games for a specific postseason
 ```python
 game_urls = url_scraper.get_game_urls_playoffs(2006)
 game_data = data_scraper.get_games_data(game_urls)
+```
+
+Collect player stats for for a specific day
+```python
+from datetime import date
+
+game_urls = url_scraper.get_game_urls_day(date(2022,1,7))
+pl_stats_data = data_scraper.get_player_stats_data(game_urls)
 ```
 
 ### Data Saving Package

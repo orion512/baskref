@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from urllib import parse
 from bs4 import BeautifulSoup
 import baskref.data_collection.html_scraper as scr
-from baskref.utils import str_to_datetime, num, broadcast
+from baskref.utils import str_to_datetime, num, broadcast, join_list_dics
 
 logger = logging.getLogger(__name__)
 
@@ -338,23 +338,14 @@ class BaskRefDataScraper(scr.HTMLScraper):
             game_page, away_team_sn
         )
 
-        home_basic_dic = sorted(home_basic_dic, key=lambda d: d["player_id"])
-        home_advanced_dic = sorted(
-            home_advanced_dic, key=lambda d: d["player_id"]
+        # join basic and advanced
+        home_players = join_list_dics(
+            home_basic_dic, home_advanced_dic, "player_id"
         )
 
-        away_basic_dic = sorted(away_basic_dic, key=lambda d: d["player_id"])
-        away_advanced_dic = sorted(
-            away_advanced_dic, key=lambda d: d["player_id"]
+        away_players = join_list_dics(
+            away_basic_dic, away_advanced_dic, "player_id"
         )
-
-        home_players = []
-        for bas, adv in zip(home_basic_dic, home_advanced_dic):
-            home_players.append(bas | adv)
-
-        away_players = []
-        for bas, adv in zip(away_basic_dic, away_advanced_dic):
-            away_players.append(bas | adv)
 
         return [
             *home_players,
@@ -391,11 +382,14 @@ class BaskRefDataScraper(scr.HTMLScraper):
             "data-append-csv"
         ]
 
-        dnp = "Did Not Play" in row.text
+        dnp = bool(row.select_one("td[data-stat=reason]"))
 
         return {
             "player_name": player_name,
             "player_id": player_id,
+            "mp": None
+            if dnp
+            else (row.select_one("td[data-stat=mp]").text or None),
             "fg": None
             if dnp
             else (num(row.select_one("td[data-stat=fg]").text or None)),
@@ -450,6 +444,11 @@ class BaskRefDataScraper(scr.HTMLScraper):
             "pts": None
             if dnp
             else (num(row.select_one("td[data-stat=pts]").text or None)),
+            "plsmin": None
+            if dnp
+            else (
+                num(row.select_one("td[data-stat=plus_minus]").text or None)
+            ),
         }
 
     def _parse_player_advanced_stats(
@@ -482,7 +481,7 @@ class BaskRefDataScraper(scr.HTMLScraper):
             "data-append-csv"
         ]
 
-        dnp = "Did Not Play" in row.text
+        dnp = bool(row.select_one("td[data-stat=reason]"))
 
         return {
             "player_name": player_name,
@@ -530,6 +529,9 @@ class BaskRefDataScraper(scr.HTMLScraper):
             "tov_pct": None
             if dnp
             else (num(row.select_one("td[data-stat=tov_pct]").text or None)),
+            "usg_pct": None
+            if dnp
+            else (num(row.select_one("td[data-stat=usg_pct]").text or None)),
             "off_rtg": None
             if dnp
             else (num(row.select_one("td[data-stat=off_rtg]").text or None)),

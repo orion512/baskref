@@ -176,7 +176,7 @@ def run_data_collection_manager(settings: Settings) -> list:
     if settings.in_line.type not in collection_modes:
         raise IllegalArgumentError(
             f"{settings.in_line.type} is not a valid value for the type ",
-            "(-t) argument. Choose one of the following: g, t, p, gs, gp.",
+            "(-t) argument.",
         )
 
     return collection_modes[settings.in_line.type](settings)
@@ -228,10 +228,15 @@ def run_season_collector(settings: Settings) -> list:
 
     # 2. Get the game data for the list of games
     data_scraper = BaskRefDataScraper(settings.in_line.proxy)
-    game_data = data_scraper.get_games_data(game_urls)
-    logger.info(f"Scraped {len(game_data)} games")
 
-    return game_data
+    if settings.in_line.type == "gspl":
+        data = data_scraper.get_player_stats_data(game_urls)
+    elif settings.in_line.type == "gs":
+        data = data_scraper.get_games_data(game_urls)
+
+    logger.info(f"Scraped {len(data)} data points")
+
+    return data
 
 
 def run_playoffs_collector(settings: Settings) -> list:
@@ -250,10 +255,15 @@ def run_playoffs_collector(settings: Settings) -> list:
 
     # 2. Get the game data for the list of games
     data_scraper = BaskRefDataScraper(settings.in_line.proxy)
-    game_data = data_scraper.get_games_data(game_urls)
-    logger.info(f"Scraped {len(game_data)} games")
 
-    return game_data
+    if settings.in_line.type == "gppl":
+        data = data_scraper.get_player_stats_data(game_urls)
+    elif settings.in_line.type == "gp":
+        data = data_scraper.get_games_data(game_urls)
+
+    logger.info(f"Scraped {len(data)} data points")
+
+    return data
 
 
 ## Data Saving Functions

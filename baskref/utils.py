@@ -56,3 +56,27 @@ def broadcast(list_dicts: list[dict], key: str, val: Any) -> list[dict]:
         dic[key] = val
 
     return list_dicts
+
+
+def join_list_dics(
+    ldics1: list[dict], ldics2: list[dict], col: str
+) -> list[dict]:
+    """
+    Joins all dictionaries in two lists of dictionaries on a column.
+    Both lists need to be of the same length.
+    """
+
+    if len(ldics1) != len(ldics2):
+        raise ValueError(
+            f"The lengths of ldics1({len(ldics1)}) and ldics2({len(ldics2)})"
+            "need to be the same"
+        )
+
+    ldics1 = sorted(ldics1, key=lambda d: d[col])
+    ldics2 = sorted(ldics2, key=lambda d: d[col])
+
+    joined_list = []
+    for dic1, dic2 in zip(ldics1, ldics2):
+        joined_list.append(dic1 | dic2)
+
+    return joined_list
