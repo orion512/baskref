@@ -7,10 +7,10 @@ Author: Dominik Zulovec Sajovic, May 2022
 
 import logging
 from dataclasses import dataclass
-from datetime import datetime
 from urllib import parse
 from bs4 import BeautifulSoup
 import baskref.data_collection.html_scraper as scr
+from baskref.utils import str_to_datetime, num, broadcast, join_list_dics
 
 logger = logging.getLogger(__name__)
 
@@ -23,12 +23,22 @@ class BaskRefDataScraper(scr.HTMLScraper):
 
     def get_games_data(self, game_urls: list) -> list:
         """
-        Scrapes the data for all the game urls provided
+        Scrapes the game data for all the game urls provided
         :game_urls: list of box score game urls from basketball reference
         :return: returns a list of dictionaries with game data
         """
 
         return [self._scrape_game_data(url) for url in game_urls]
+
+    def get_player_stats_data(self, game_urls: list) -> list:
+        """
+        Scrapes the player stats data for all the game urls provided.
+        :game_urls: list of box score game urls from basketball reference
+        :return: returns a list of dictionaries with plaayer stats data
+        """
+
+        pl_stats = [self._scrape_player_stats_data(url) for url in game_urls]
+        return [pl for game in pl_stats for pl in game]
 
     # Private Methods
 
@@ -36,22 +46,42 @@ class BaskRefDataScraper(scr.HTMLScraper):
 
     def _scrape_game_data(self, game_url: str) -> dict:
         """
-        Scrapes the data for the given game web page.
+        Scrapes the game data for the given game web page.
         :game_url: a Basketball Reference URL to a game page
         :return: returns a dictionary of game data
         """
 
-        game_data = self.scrape(game_url, self._parse_full_game_data)
+        logger.debug(f"\tScraping {game_url}")
+        game_data = self.scrape(game_url, self._parse_game_data)
         game_data["game_id"] = self._parse_game_id(game_url)
         game_data["game_url"] = game_url
 
         return game_data
 
+    def _scrape_player_stats_data(self, game_url: str) -> dict:
+        """
+        Scrapes the player stats data for the given game web page.
+        :game_url: a Basketball Reference URL to a game page
+        :return: returns a dictionary of player stats data
+        """
+
+        logger.debug(f"\tScraping {game_url}")
+        player_stats_data = self.scrape(
+            game_url, self._parse_player_stats_data
+        )
+        game_id = self._parse_game_id(game_url)
+
+        for pl_stat in player_stats_data:
+            pl_stat["game_id"] = game_id
+            pl_stat["game_url"] = game_url
+
+        return player_stats_data
+
     ## parsing functions
 
-    def _parse_full_game_data(self, game_page: BeautifulSoup) -> dict:
+    def _parse_game_data(self, game_page: BeautifulSoup) -> dict:
         """
-        Scrapes the data for the given game web page.
+        Parses the game data for the given game web page.
         :game_url: a Basketball Reference URL to a game page
         :return: returns a dictionary of game data
         """
@@ -61,8 +91,7 @@ class BaskRefDataScraper(scr.HTMLScraper):
         away_team_fn, away_team_sn = self._parse_team_name(game_page, "away")
 
         # game meta data
-        game_time, arena_name = self._parse_game_meta_data(game_page)
-        attendance = self._parse_attendance(game_page)
+        meta_data = self._parse_game_meta_data(game_page)
 
         # basic stats
         home_basic_dic = self._parse_basic_stats(
@@ -87,9 +116,7 @@ class BaskRefDataScraper(scr.HTMLScraper):
             "away_team": away_team_sn,
             "home_team_full_name": home_team_fn,
             "away_team_full_name": away_team_fn,
-            "game_time": game_time,
-            "arena_name": arena_name,
-            "attendance": attendance,
+            **meta_data,
             **home_basic_dic,
             **away_basic_dic,
             **home_advanced_dic,
@@ -109,7 +136,7 @@ class BaskRefDataScraper(scr.HTMLScraper):
         if team not in ["home", "away"]:
             raise ValueError('The team argument can only be "home" or "away"')
 
-        team_idx = 1 if team == "home" else 2
+        team_idx = 2 if team == "home" else 1
 
         team_anchor = html.select_one(
             f"#content > div.scorebox > div:nth-child({team_idx}) "
@@ -118,32 +145,31 @@ class BaskRefDataScraper(scr.HTMLScraper):
 
         return team_anchor.text, team_anchor.attrs["href"].split("/")[2]
 
-    def _parse_game_meta_data(
-        self, html: BeautifulSoup
-    ) -> tuple[datetime, str]:
+    def _parse_game_meta_data(self, html: BeautifulSoup) -> dict:
         """
         Provided the BR game page it parses out the game time and
         game arena name.
-        :return: Tuple(time of game start, name of the arena)
+        :return: dictionary of meta data
         """
 
         meta_holder = html.select_one("div.scorebox_meta")
-        # TODO: improve below nested try-catch
-        try:
-            game_time = datetime.strptime(
-                meta_holder.find("div").text, "%I:%M %p, %B %d, %Y"
-            )
-        except ValueError:
-            try:
-                game_time = datetime.strptime(
-                    meta_holder.find("div").text, "%B %d, %Y"
-                )
-            except ValueError:
-                game_time = datetime(1900, 1, 1)
+
+        game_time = str_to_datetime(
+            meta_holder.find("div").text, ["%I:%M %p, %B %d, %Y", "%B %d, %Y"]
+        )
 
         arena_name = meta_holder.find_all("div")[1].text.split(",")[0]
 
-        return game_time, arena_name
+        playin = "play-in" in html.select_one("#content > h1").text.lower()
+
+        attendance = self._parse_attendance(html)
+
+        return {
+            "game_time": game_time,
+            "arena_name": arena_name,
+            "playin_game": playin,
+            "attendance": attendance,
+        }
 
     def _parse_attendance(self, html: BeautifulSoup) -> int | None:
         """
@@ -283,3 +309,235 @@ class BaskRefDataScraper(scr.HTMLScraper):
         }
 
         return game_dic
+
+    def _parse_player_stats_data(self, game_page: BeautifulSoup) -> list[dict]:
+        """
+        Parses the player stats data for the given game web page.
+        :game_url: a Basketball Reference URL to a game page
+        :return: returns a dictionary of game data
+        """
+
+        _, home_team_sn = self._parse_team_name(game_page, "home")
+        _, away_team_sn = self._parse_team_name(game_page, "away")
+
+        # basic stats
+        home_basic_dic = self._parse_player_basic_stats(
+            game_page, home_team_sn
+        )
+        home_basic_dic = broadcast(home_basic_dic, "team", home_team_sn)
+
+        away_basic_dic = self._parse_player_basic_stats(
+            game_page, away_team_sn
+        )
+        away_basic_dic = broadcast(away_basic_dic, "team", away_team_sn)
+
+        # advanced stats
+        home_advanced_dic = self._parse_player_advanced_stats(
+            game_page, home_team_sn
+        )
+
+        away_advanced_dic = self._parse_player_advanced_stats(
+            game_page, away_team_sn
+        )
+
+        # join basic and advanced
+        home_players = join_list_dics(
+            home_basic_dic, home_advanced_dic, "player_id"
+        )
+
+        away_players = join_list_dics(
+            away_basic_dic, away_advanced_dic, "player_id"
+        )
+
+        return [
+            *home_players,
+            *away_players,
+        ]
+
+    def _parse_player_basic_stats(
+        self, page: BeautifulSoup, team_sn: str
+    ) -> list[dict[str, int | float]]:
+        """
+        Provided the BR game page it parses out the basic stats
+        for either the home or the road team, depending on the
+        passed parameter.
+        :team: inidcates if it team is home or away
+        :return: dictionary of basic stats
+        """
+
+        table_finder = f"#box-{team_sn.upper()}-game-basic"
+
+        table = page.select_one(table_finder)
+        pl_trs = table.select("tbody > tr[class!='thead']")
+
+        return [self._parse_player_basic_stats_row(pl_tr) for pl_tr in pl_trs]
+
+    def _parse_player_basic_stats_row(self, row: BeautifulSoup) -> dict:
+        """
+        Provided a row from the BR game page it parses out the basic stats
+        :team: inidcates if it team is home or away
+        :return: dictionary of basic stats
+        """
+
+        player_name = row.select_one("th[data-stat=player]").text
+        player_id = row.select_one("th[data-stat=player]").attrs[
+            "data-append-csv"
+        ]
+
+        dnp = bool(row.select_one("td[data-stat=reason]"))
+
+        return {
+            "player_name": player_name,
+            "player_id": player_id,
+            "mp": None
+            if dnp
+            else (row.select_one("td[data-stat=mp]").text or None),
+            "fg": None
+            if dnp
+            else (num(row.select_one("td[data-stat=fg]").text or None)),
+            "fga": None
+            if dnp
+            else (num(row.select_one("td[data-stat=fga]").text or None)),
+            "fg_pct": None
+            if dnp
+            else (num(row.select_one("td[data-stat=fg_pct]").text or None)),
+            "fg3": None
+            if dnp
+            else (num(row.select_one("td[data-stat=fg3]").text or None)),
+            "fg3a": None
+            if dnp
+            else (num(row.select_one("td[data-stat=fg3a]").text or None)),
+            "fg3_pct": None
+            if dnp
+            else (num(row.select_one("td[data-stat=fg3_pct]").text or None)),
+            "ft": None
+            if dnp
+            else (num(row.select_one("td[data-stat=ft]").text or None)),
+            "fta": None
+            if dnp
+            else (num(row.select_one("td[data-stat=fta]").text or None)),
+            "ft_pct": None
+            if dnp
+            else (num(row.select_one("td[data-stat=ft_pct]").text or None)),
+            "orb": None
+            if dnp
+            else (num(row.select_one("td[data-stat=orb]").text or None)),
+            "drb": None
+            if dnp
+            else (num(row.select_one("td[data-stat=drb]").text or None)),
+            "trb": None
+            if dnp
+            else (num(row.select_one("td[data-stat=trb]").text or None)),
+            "ast": None
+            if dnp
+            else (num(row.select_one("td[data-stat=ast]").text or None)),
+            "stl": None
+            if dnp
+            else (num(row.select_one("td[data-stat=stl]").text or None)),
+            "blk": None
+            if dnp
+            else (num(row.select_one("td[data-stat=blk]").text or None)),
+            "tov": None
+            if dnp
+            else (num(row.select_one("td[data-stat=tov]").text or None)),
+            "pf": None
+            if dnp
+            else (num(row.select_one("td[data-stat=pf]").text or None)),
+            "pts": None
+            if dnp
+            else (num(row.select_one("td[data-stat=pts]").text or None)),
+            "plsmin": None
+            if dnp
+            else (
+                num(row.select_one("td[data-stat=plus_minus]").text or None)
+            ),
+        }
+
+    def _parse_player_advanced_stats(
+        self, page: BeautifulSoup, team_sn: str
+    ) -> list[dict[str, int | float]]:
+        """
+        Provided the BR game page it parses out the advanced stats
+        for either the home or the road team, depending on the
+        passed parameter.
+        :team: inidcates if it team is home or away
+        :return: dictionary of basic stats
+        """
+
+        table_finder = f"#box-{team_sn.upper()}-game-advanced"
+
+        table = page.select_one(table_finder)
+        pl_trs = table.select("tbody > tr[class!='thead']")
+
+        return [self._parse_player_adv_stats_row(pl_tr) for pl_tr in pl_trs]
+
+    def _parse_player_adv_stats_row(self, row: BeautifulSoup) -> dict:
+        """
+        Provided a row from the BR game page it parses out the advanced stats
+        :team: inidcates if it team is home or away
+        :return: dictionary of basic stats
+        """
+
+        player_name = row.select_one("th[data-stat=player]").text
+        player_id = row.select_one("th[data-stat=player]").attrs[
+            "data-append-csv"
+        ]
+
+        dnp = bool(row.select_one("td[data-stat=reason]"))
+
+        return {
+            "player_name": player_name,
+            "player_id": player_id,
+            "ts_pct": None
+            if dnp
+            else (num(row.select_one("td[data-stat=ts_pct]").text or None)),
+            "efg_pct": None
+            if dnp
+            else (num(row.select_one("td[data-stat=efg_pct]").text or None)),
+            "fg3a_per_fga_pct": None
+            if dnp
+            else (
+                num(
+                    row.select_one("td[data-stat=fg3a_per_fga_pct]").text
+                    or None
+                )
+            ),
+            "fta_per_fga_pct": None
+            if dnp
+            else (
+                num(
+                    row.select_one("td[data-stat=fta_per_fga_pct]").text
+                    or None
+                )
+            ),
+            "orb_pct": None
+            if dnp
+            else (num(row.select_one("td[data-stat=orb_pct]").text or None)),
+            "drb_pct": None
+            if dnp
+            else (num(row.select_one("td[data-stat=drb_pct]").text or None)),
+            "trb_pct": None
+            if dnp
+            else (num(row.select_one("td[data-stat=trb_pct]").text or None)),
+            "ast_pct": None
+            if dnp
+            else (num(row.select_one("td[data-stat=ast_pct]").text or None)),
+            "stl_pct": None
+            if dnp
+            else (num(row.select_one("td[data-stat=stl_pct]").text or None)),
+            "blk_pct": None
+            if dnp
+            else (num(row.select_one("td[data-stat=blk_pct]").text or None)),
+            "tov_pct": None
+            if dnp
+            else (num(row.select_one("td[data-stat=tov_pct]").text or None)),
+            "usg_pct": None
+            if dnp
+            else (num(row.select_one("td[data-stat=usg_pct]").text or None)),
+            "off_rtg": None
+            if dnp
+            else (num(row.select_one("td[data-stat=off_rtg]").text or None)),
+            "def_rtg": None
+            if dnp
+            else (num(row.select_one("td[data-stat=def_rtg]").text or None)),
+        }
