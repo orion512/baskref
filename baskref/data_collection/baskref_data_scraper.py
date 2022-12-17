@@ -51,6 +51,7 @@ class BaskRefDataScraper(scr.HTMLScraper):
         :return: returns a dictionary of game data
         """
 
+        logger.debug(f"\tScraping {game_url}")
         game_data = self.scrape(game_url, self._parse_game_data)
         game_data["game_id"] = self._parse_game_id(game_url)
         game_data["game_url"] = game_url
@@ -64,6 +65,7 @@ class BaskRefDataScraper(scr.HTMLScraper):
         :return: returns a dictionary of player stats data
         """
 
+        logger.debug(f"\tScraping {game_url}")
         player_stats_data = self.scrape(
             game_url, self._parse_player_stats_data
         )

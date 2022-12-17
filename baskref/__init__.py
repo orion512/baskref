@@ -35,6 +35,9 @@ def run_baskref() -> None:
         """%(name)s:%(lineno)d\t%(message)s""",
     )
 
+    logging.getLogger("requests").setLevel(logging.WARNING)
+    logging.getLogger("urllib3").setLevel(logging.WARNING)
+
     parser = argparse.ArgumentParser()
 
     parser.add_argument(

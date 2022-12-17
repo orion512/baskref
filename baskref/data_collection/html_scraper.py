@@ -10,8 +10,10 @@ import logging
 from typing import Callable, Any
 import requests
 from requests import Response
+from requests.exceptions import ProxyError
 from bs4 import BeautifulSoup
 from fake_useragent import UserAgent
+
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +31,12 @@ class HTMLScraper:
         the provided function to parse out the wanted data.
         """
 
-        page = self.get_page_logic(url)
+        try:
+            page = self.get_page_logic(url)
+        except ProxyError as p_err:
+            logger.info(f"A Proxy Error occurred {p_err}. Trying again!")
+            page = self.get_page_logic(url)
+
         soup = BeautifulSoup(page.text, "html.parser")
         return parser_fun(soup)
 
