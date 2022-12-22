@@ -93,8 +93,10 @@ class HTMLScraper:
         if self._is_success_response(page):
             return page
 
-        logger.info(f"[1] Normal scrape failed ({page.status_code})")
-        logger.info(f"\t Proxy used: {self.proxy}")
+        logger.debug(
+            f"[1] Normal scrape failed ({page.status_code}). "
+            f"Proxy used: {self.proxy}"
+        )
 
         # 2. GET request with a randomized user-agent
         page = self.get_page(url, proxies=self._proxies(), rand_agent=True)
@@ -102,12 +104,19 @@ class HTMLScraper:
         if self._is_success_response(page):
             return page
 
-        logger.info(f"[2] Random UA scrape failed ({page.status_code})")
-        logger.info(f"\t Proxy used: {self.proxy}")
+        logger.debug(
+            f"[2] Random user agent scrape failed ({page.status_code}). "
+            f"Proxy used: {self.proxy}"
+        )
 
         # 3. Browser automation (Selenium, puppeteer)
         # TODO: self.get_page_browser(url)
         # TODO: form a requests.Response
+
+        if page.status_code == 429:
+            raise TooManyRequests(url, page.status_code)
+        if page.status_code == 403:
+            raise PermissionDenied(url, page.status_code)
 
         raise ScrapingError(url, page.status_code)
 
@@ -161,3 +170,17 @@ class ScrapingError(Exception):
         """init function"""
         self.message = f"Couldn't scrape {url}. Status code: {st_code}"
         super().__init__(self.message)
+
+
+class TooManyRequests(ScrapingError):
+    """
+    Definition for a new type of error when scraping fails due to
+    the server not accepting the amount of requests.
+    """
+
+
+class PermissionDenied(ScrapingError):
+    """
+    Definition for a new type of error when scraping fails due to
+    the server not accepting the amount of requests.
+    """

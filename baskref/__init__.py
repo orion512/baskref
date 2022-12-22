@@ -19,6 +19,11 @@ from baskref.data_collection import (
     BaskRefUrlScraper,
     BaskRefDataScraper,
 )
+from baskref.data_collection.html_scraper import (
+    TooManyRequests,
+    PermissionDenied,
+    ScrapingError,
+)
 
 from baskref.data_saving.file_saver import save_file_from_list
 
@@ -150,7 +155,26 @@ def main(args: argparse.Namespace) -> None:
     settings = Settings(in_line=in_line)
 
     # 1. Run the data collection
-    collected = run_data_collection_manager(settings)
+    try:
+        collected = run_data_collection_manager(settings)
+    except TooManyRequests as exp:
+        logger.info(
+            ":( Server responded with an error due to too many requests. "
+            "Try using a proxy or waiting at least 1 hour before continuing."
+        )
+        logger.debug(exp)
+        sys.exit(1)
+    except PermissionDenied as exp:
+        logger.info(
+            ":( Server responded with a permission error. "
+            "Try using a proxy or different combination of user agents.",
+        )
+        logger.debug(exp)
+        sys.exit(1)
+    except ScrapingError as exp:
+        logger.info(":( Server responded with an unexpected error.")
+        logger.debug(exp)
+        sys.exit(1)
 
     # 2. Run the data saver
     run_data_saving_manager(settings, collected)
