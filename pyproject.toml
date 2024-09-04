@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "baskref"
-version = "0.0.6"
+version = "0.0.8"
 authors = [
   {name="Dominik Zulovec Sajovic", email="dominik.zsajovic@gmail.com"},
 ]
@@ -50,7 +50,7 @@ exclude = '''
 '''
 
 [tool.setuptools.packages.find]
-include = ["baskref"]
+include = ["baskref", "baskref.*"]
 exclude = ["notebooks*"]
 
 [tool.mypy]
