@@ -235,7 +235,7 @@ class BaskRefDataScraper(scr.HTMLScraper):
             f"{team}_ft": int(tb_foot.select_one("td[data-stat=ft]").text),
             f"{team}_fta": int(tb_foot.select_one("td[data-stat=fta]").text),
             f"{team}_ft_pct": float(
-                tb_foot.select_one("td[data-stat=ft_pct]").text
+                tb_foot.select_one("td[data-stat=ft_pct]").text or 0
             ),
             f"{team}_orb": int(tb_foot.select_one("td[data-stat=orb]").text),
             f"{team}_drb": int(tb_foot.select_one("td[data-stat=drb]").text),
