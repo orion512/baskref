@@ -191,7 +191,7 @@ class BaskRefDataScraper(scr.HTMLScraper):
         if ":" not in title_text:
             return {
                 "playin_game": False,
-                "playoff_game": None,
+                "playoff_game": False,
                 "playoff_conference": None,
                 "playoff_round": None,
                 "playoff_game_number": None,
@@ -202,7 +202,7 @@ class BaskRefDataScraper(scr.HTMLScraper):
         if "play-in" in title_text:
             return {
                 "playin_game": True,
-                "playoff_game": None,
+                "playoff_game": False,
                 "playoff_conference": None,
                 "playoff_round": None,
                 "playoff_game_number": None,
