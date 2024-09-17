@@ -160,15 +160,94 @@ class BaskRefDataScraper(scr.HTMLScraper):
 
         arena_name = meta_holder.find_all("div")[1].text.split(",")[0]
 
-        playin = "play-in" in html.select_one("#content > h1").text.lower()
+        special_title_data = self._parse_special_title_data(html)
 
         attendance = self._parse_attendance(html)
 
         return {
             "game_time": game_time,
             "arena_name": arena_name,
-            "playin_game": playin,
             "attendance": attendance,
+            **special_title_data,
+        }
+
+    def _parse_special_title_data(self, html: BeautifulSoup) -> dict:
+        """
+        Provided the BR game page, it parses out the playoff details.
+        If the game is a playoff game, the title includes that information,
+        which we parse out.
+
+        :return: playoff_data as a dict
+            {
+                "playoff_game": True,
+                "playoff_conference": "East",
+                "playoff_round": "First Round",
+                "playoff_game_number": 4
+            }
+        """
+
+        title_text = html.select_one("#content > h1").text.lower()
+
+        if ":" not in title_text:
+            return {
+                "playin_game": False,
+                "playoff_game": False,
+                "playoff_conference": None,
+                "playoff_round": None,
+                "playoff_game_number": None,
+            }
+
+        title_text = title_text.split(":")[0]
+
+        if "play-in" in title_text:
+            return {
+                "playin_game": True,
+                "playoff_game": False,
+                "playoff_conference": None,
+                "playoff_round": None,
+                "playoff_game_number": None,
+            }
+
+        # at this point we know there should be playoff data
+
+        playoff_rounds = [
+            "first round",
+            "conference semifinals",
+            "conference finals",
+            "nba finals",
+        ]
+
+        is_playoff_game = False
+        playoff_round = None
+        playoff_conference = None
+        playoff_game_number = None
+
+        for round_name in playoff_rounds:
+            if round_name in title_text:
+                is_playoff_game = True
+                playoff_round = round_name.title()
+                break
+
+        # considered a playoff game only if round detected
+        if is_playoff_game:
+            if "eastern conference" in title_text:
+                playoff_conference = "East"
+            elif "western conference" in title_text:
+                playoff_conference = "West"
+
+            last_two_words = title_text.split()[-2:]
+            if (
+                len(last_two_words) == 2
+                and last_two_words[0].lower() == "game"
+            ):
+                playoff_game_number = int(last_two_words[1])
+
+        return {
+            "playin_game": False,
+            "playoff_game": is_playoff_game,
+            "playoff_conference": playoff_conference,
+            "playoff_round": playoff_round,
+            "playoff_game_number": playoff_game_number,
         }
 
     def _parse_attendance(self, html: BeautifulSoup) -> int | None:
