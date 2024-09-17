@@ -237,21 +237,33 @@ pre-commit install
 ### Prepare a new Version
 This section describes some of the steps when preparing a new baskref version.
 
+- empty the dist folder
+```
+rm -rf dist/*
+```
+
 - adjust the pyproject.toml file
     - version
     - dependencies
+
 - install project locally and test it
 ```
 python -m build
 pip install .
 ```
-- publish project to test.pypi
+
+- install twine
 ```
 pip install --upgrade twine
+```
+
+- publish project to test.pypi (optional)
+```
 twine upload --repository testpypi dist/*
 # install from test.pypi
 pip install --index-url https://test.pypi.org/simple/ baskref
 ```
+
 - publish a new version
 ```
 twine upload dist/*
