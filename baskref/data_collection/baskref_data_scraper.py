@@ -153,12 +153,21 @@ class BaskRefDataScraper(scr.HTMLScraper):
         """
 
         meta_holder = html.select_one("div.scorebox_meta")
+        divs = meta_holder.find_all("div")
+
+        # Check if the first div contains 'In-Season Tournament'
+        if "season tournament" in divs[0].text.lower():
+            game_time_div = divs[1]
+            arena_div = divs[2]
+        else:
+            game_time_div = divs[0]
+            arena_div = divs[1]
 
         game_time = str_to_datetime(
-            meta_holder.find("div").text, ["%I:%M %p, %B %d, %Y", "%B %d, %Y"]
+            game_time_div.text, ["%I:%M %p, %B %d, %Y", "%B %d, %Y"]
         )
 
-        arena_name = meta_holder.find_all("div")[1].text.split(",")[0]
+        arena_name = arena_div.text.split(",")[0]
 
         special_title_data = self._parse_special_title_data(html)
 
